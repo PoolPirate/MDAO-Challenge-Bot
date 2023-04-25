@@ -1,7 +1,6 @@
 ﻿using MDAO_Challenge_Bot.Entities;
 using MDAO_Challenge_Bot.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography.X509Certificates;
 
 namespace MDAO_Challenge_Bot.Persistence;
 public class ChallengeDBContext : DbContext
@@ -10,6 +9,8 @@ public class ChallengeDBContext : DbContext
     public DbSet<LaborMarketRequest> LaborMarketRequests { get; set; }
 
     public DbSet<AirtableChallenge> AirtableChallenges { get; set; }
+
+    public DbSet<TokenContract> TokenContracts { get; set; }
 
     public ChallengeDBContext(DbContextOptions options)
         : base(options)

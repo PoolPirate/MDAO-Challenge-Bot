@@ -1,5 +1,6 @@
 ﻿using AirtableApiClient;
 using Common.Extensions;
+using Discord;
 using Discord.Webhook;
 using MDAO_Challenge_Bot.Options;
 using MDAO_Challenge_Bot.Persistence;

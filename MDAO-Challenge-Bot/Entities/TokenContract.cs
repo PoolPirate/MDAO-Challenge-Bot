@@ -1,4 +1,5 @@
 ﻿using MDAO_Challenge_Bot.Models;
+using System.Numerics;
 
 namespace MDAO_Challenge_Bot.Entities;
 public class TokenContract
@@ -9,4 +10,7 @@ public class TokenContract
 
     public virtual List<AirtableChallenge>? AirtableChallengeUsages { get; set; } //Navigation Property
     public virtual List<LaborMarketRequest>? LaborMarketRequestUsages { get; set; } //Navigation Property
+
+    public double DecimalsAdjust(BigInteger amount)
+        => Math.Exp(BigInteger.Log(amount) - BigInteger.Log(BigInteger.Pow(10, Decimals)));
 }

@@ -21,4 +21,11 @@ public class SmartContractService : Singleton
         var receipt = await Web3.Eth.Transactions.GetTransactionByHash.SendRequestAsync(transactionHash);
         return receipt.DecodeTransactionToFunctionMessage<T>();
     }
+
+    public async Task<TResult> CallAsync<TFunction, TResult>(string contractAddress, TFunction? message = null)
+        where TFunction : FunctionMessage, new()
+    {
+        var handler = Web3.Eth.GetContractQueryHandler<TFunction>();
+        return await handler.QueryAsync<TResult>(contractAddress, message!);
+    }
 }

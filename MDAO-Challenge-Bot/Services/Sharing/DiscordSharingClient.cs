@@ -1,6 +1,9 @@
 ﻿using Common.Services;
+using Discord;
 using Discord.Webhook;
+using MDAO_Challenge_Bot.Entities;
 using MDAO_Challenge_Bot.Models;
+using MDAO_Challenge_Bot.Utils;
 
 namespace MDAO_Challenge_Bot.Services.Sharing;
 public class DiscordSharingClient : Singleton
@@ -19,20 +22,26 @@ public class DiscordSharingClient : Singleton
 
     public async Task ShareAsync(AirtableChallenge challenge)
     {
-        await WebhookClient.SendMessageAsync(MakeAirtableDiscordMessage(challenge));
+        //await WebhookClient.SendMessageAsync(MakeAirtableDiscordMessage(challenge));
     }
 
-    private static string MakeLaborMarketDiscordMessage(LaborMarket laborMarket, LaborMarketRequest request)
+    private static Embed MakeLaborMarketEmbed(LaborMarket laborMarket, LaborMarketRequest request, TokenContract paymentToken)
     {
-        return $"""
-    {request.Title} | Deadline to claim: <t:{request.ClaimSubmitExpiration}:R> 
-
-    https://metricsdao.xyz/app/market/{laborMarket.Address}/request/{request.RequestId}
-    """;
+        return new EmbedBuilder()
+            .WithColor(Color.Gold)
+            .WithTitle(laborMarket.Name)
+            .AddField(
+                "Reward Pool",
+                $"{MathUtils.RoundToSignificantDigits(paymentToken.DecimalsAdjust(request.PaymentTokenAmount), 4)} {paymentToken.Symbol}")
+            .AddField("Deadline to Claim", $"<t:{request.ClaimSubmitExpiration}:R>")
+            .AddField("Claim Now", $"https://metricsdao.xyz/app/market/{laborMarket.Address}/request/{request.RequestId}")
+            .Build();
     }
 
-    public async Task ShareAsync(LaborMarket laborMarket, LaborMarketRequest request)
+    public async Task ShareAsync(LaborMarket laborMarket, LaborMarketRequest request, TokenContract paymentToken)
     {
-        await WebhookClient.SendMessageAsync(MakeLaborMarketDiscordMessage(laborMarket, request));
+        await WebhookClient.SendMessageAsync(embeds: new[] { MakeLaborMarketEmbed(laborMarket, request, paymentToken) });
     }
+
+
 }

@@ -12,7 +12,7 @@ public class AirtableChallenge
     public required string Description { get; init; }
     public required string Level { get; init; }
 
-    public required string? PaymentTokenAddress { get; init; }
+    public string? PaymentTokenAddress { get; init; }
 
     [JsonPropertyName("Start Date")]
     public required DateTimeOffset StartDate { get; init; }

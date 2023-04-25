@@ -1,4 +1,5 @@
 ﻿using Common.Services;
+using MDAO_Challenge_Bot.Entities;
 using MDAO_Challenge_Bot.Models;
 
 namespace MDAO_Challenge_Bot.Services.Sharing;
@@ -14,8 +15,8 @@ public class SharingService : Singleton
         await DiscordSharingClient.ShareAsync(challenge);
     }
 
-    public async Task ShareLaborMarketRequestAsync(LaborMarket laborMarket, LaborMarketRequest request)
+    public async Task ShareLaborMarketRequestAsync(LaborMarket laborMarket, LaborMarketRequest request, TokenContract paymentToken)
     {
-        await DiscordSharingClient.ShareAsync(laborMarket, request);
+        await DiscordSharingClient.ShareAsync(laborMarket, request, paymentToken);
     }
 }
