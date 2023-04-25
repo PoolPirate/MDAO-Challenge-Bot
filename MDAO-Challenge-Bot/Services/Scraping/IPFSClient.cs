@@ -1,10 +1,5 @@
 ﻿using Common.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MDAO_Challenge_Bot.Services.Scraping;
 public class IPFSClient : Singleton
@@ -17,7 +12,7 @@ public class IPFSClient : Singleton
     public async Task<T> GetJsonAsync<T>(string key)
     {
         var url = new Uri(IPFSApiUrl, key);
-        return await Client.GetFromJsonAsync<T>(url) 
+        return await Client.GetFromJsonAsync<T>(url)
             ?? throw new InvalidOperationException($"Expected {nameof(T)} got {null}");
-    } 
+    }
 }

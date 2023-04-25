@@ -13,7 +13,7 @@ using Nethereum.RPC.Eth.DTOs;
 namespace MDAO_Challenge_Bot.Services.Scraping;
 public class LaborMarketScraper : Singleton
 {
-    private const int UpdateInterval = 5000;
+    private const int UpdateInterval = 10000;
 
     [Inject]
     private readonly SmartContractService SmartContractService = null!;
@@ -135,7 +135,6 @@ public class LaborMarketScraper : Singleton
 
     private async Task HandleNewRequestAsync(LaborMarket laborMarket, LaborMarketRequest request)
     {
-        
-
+        await SharingService.ShareLaborMarketRequestAsync(laborMarket, request);
     }
 }

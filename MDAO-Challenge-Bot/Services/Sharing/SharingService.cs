@@ -13,4 +13,9 @@ public class SharingService : Singleton
     {
         await DiscordSharingClient.ShareAsync(challenge);
     }
+
+    public async Task ShareLaborMarketRequestAsync(LaborMarket laborMarket, LaborMarketRequest request)
+    {
+        await DiscordSharingClient.ShareAsync(laborMarket, request);
+    }
 }

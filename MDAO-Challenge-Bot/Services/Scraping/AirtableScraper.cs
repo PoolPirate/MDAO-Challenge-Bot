@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 namespace MDAO_Challenge_Bot.Services.Scraping;
 public class AirtableScraper : Singleton
 {
-    private const int UpdateInterval = 5000;
+    private const int UpdateInterval = 10000;
 
     [Inject]
     private readonly AirtableOptions AirtableOptions = null!;

@@ -3,6 +3,8 @@
 namespace MDAO_Challenge_Bot.Models;
 public class LaborMarketRequest
 {
+    public long Id { get; init; }
+
     public required long RequestId { get; init; }
     public required long LaborMarketId { get; init; }
 

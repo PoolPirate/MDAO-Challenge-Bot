@@ -28,13 +28,24 @@ public class ChallengeDBContext : DbContext
 
             b.Property(x => x.LastUpdatedAtBlockHeight);
 
+            b.HasMany(x => x.Requests)
+            .WithOne(x => x.LaborMarket)
+            .HasForeignKey(x => x.LaborMarketId);
+
             b.ToTable("LaborMarket");
         });
 
         modelBuilder.Entity<LaborMarketRequest>(b =>
         {
+            b.Property(x => x.Id)
+            .ValueGeneratedOnAdd()
+            .UseIdentityAlwaysColumn();
+            b.HasKey(x => x.Id);
+
             b.Property(x => x.RequestId);
-            b.HasKey(x => x.RequestId);
+
+            b.HasIndex(x => new { x.RequestId, x.LaborMarketId })
+            .IsUnique();
 
             b.Property(x => x.Requester);
             b.Property(x => x.IPFSUri);
