@@ -29,12 +29,13 @@ public class DiscordSharingClient : Singleton
     {
         return new EmbedBuilder()
             .WithColor(Color.Gold)
-            .WithTitle(laborMarket.Name)
+            .WithTitle(request.Title)
             .AddField(
                 "Reward Pool",
                 $"{MathUtils.RoundToSignificantDigits(paymentToken.DecimalsAdjust(request.PaymentTokenAmount), 4)} {paymentToken.Symbol}")
             .AddField("Deadline to Claim", $"<t:{request.ClaimSubmitExpiration}:R>")
-            .AddField("Claim Now", $"https://metricsdao.xyz/app/market/{laborMarket.Address}/request/{request.RequestId}")
+            .AddField("Marketplace", laborMarket.Name, true)
+            .AddField("Claim Now", $"https://metricsdao.xyz/app/market/{laborMarket.Address}/request/{request.RequestId}", true)
             .Build();
     }
 
