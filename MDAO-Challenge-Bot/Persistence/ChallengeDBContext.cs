@@ -1,5 +1,7 @@
-﻿using MDAO_Challenge_Bot.Models;
+﻿using MDAO_Challenge_Bot.Entities;
+using MDAO_Challenge_Bot.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography.X509Certificates;
 
 namespace MDAO_Challenge_Bot.Persistence;
 public class ChallengeDBContext : DbContext
@@ -78,6 +80,8 @@ public class ChallengeDBContext : DbContext
             b.Property(x => x.Description);
             b.Property(x => x.Level);
 
+            b.Property(x => x.PaymentTokenAddress);
+
             b.HasIndex(x => new { x.Batch, x.Name })
             .IsUnique();
 
@@ -85,6 +89,27 @@ public class ChallengeDBContext : DbContext
             b.Property(x => x.EndDate);
 
             b.ToTable("AirtableChallenges");
+        });
+
+        modelBuilder.Entity<TokenContract>(b =>
+        {
+            b.Property(x => x.Address);
+            b.HasKey(x => x.Address);
+
+            b.Property(x => x.Symbol);
+            b.Property(x => x.Decimals);
+
+            b.HasMany(x => x.AirtableChallengeUsages)
+            .WithOne(x => x.PaymentToken)
+            .HasForeignKey(x => x.PaymentTokenAddress)
+            .OnDelete(DeleteBehavior.SetNull);
+
+            b.HasMany(x => x.LaborMarketRequestUsages)
+            .WithOne(x => x.PaymentToken)
+            .HasForeignKey(x => x.PaymentTokenAddress)
+            .OnDelete(DeleteBehavior.SetNull);
+
+            b.ToTable("TokenContracts");
         });
     }
 }

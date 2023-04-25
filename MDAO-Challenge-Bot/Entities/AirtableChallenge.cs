@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using MDAO_Challenge_Bot.Entities;
+using System.Text.Json.Serialization;
 
 namespace MDAO_Challenge_Bot.Models;
 public class AirtableChallenge
@@ -10,8 +11,13 @@ public class AirtableChallenge
     public required string Name { get; init; }
     public required string Description { get; init; }
     public required string Level { get; init; }
+
+    public required string? PaymentTokenAddress { get; init; }
+
     [JsonPropertyName("Start Date")]
     public required DateTimeOffset StartDate { get; init; }
     [JsonPropertyName("End Date")]
     public required DateTimeOffset EndDate { get; init; }
+
+    public virtual TokenContract? PaymentToken { get; set; } //Navigation Property
 }
