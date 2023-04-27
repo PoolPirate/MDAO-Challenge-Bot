@@ -24,6 +24,7 @@ public class DiscordSharingClient : Singleton
     public async Task ShareAsync(AirtableChallenge challenge)
     {
         await WebhookClient.SendMessageAsync(
+            username: "Notion Challenges",
             embeds: new[] { MakeAirtableChallengeEmbed(challenge) });
     }
 
@@ -47,6 +48,7 @@ public class DiscordSharingClient : Singleton
     public async Task ShareAsync(LaborMarket laborMarket, LaborMarketRequest request, TokenContract paymentToken)
     {
         await WebhookClient.SendMessageAsync(
+            username: laborMarket.Name,
             embeds: new[] { MakeLaborMarketRequestEmbed(laborMarket, request, paymentToken) });
     }
 }
