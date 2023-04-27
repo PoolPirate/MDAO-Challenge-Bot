@@ -18,7 +18,7 @@ using System.Transactions;
 namespace MDAO_Challenge_Bot.Services.Scraping;
 public class LaborMarketScraper : Singleton
 {
-    private const int UpdateInterval = 100000;
+    private const int UpdateInterval = 10000;
 
     [Inject]
     private readonly SmartContractService SmartContractService = null!;
@@ -43,24 +43,32 @@ public class LaborMarketScraper : Singleton
     {
         while (await UpdateTimer.WaitForNextTickAsync())
         {
-            var laborMarkets = await TryGetLaborMarketsAsync();
-
-            if (laborMarkets is null)
+            try
             {
-                continue;
-            }
+                var laborMarkets = await TryGetLaborMarketsAsync();
 
-            foreach (var laborMarket in laborMarkets)
-            {
-                try
+                if (laborMarkets is null)
                 {
-                    await UpdateRequests(laborMarket);
+                    continue;
                 }
-                catch (Exception ex)
+
+                foreach (var laborMarket in laborMarkets)
                 {
-                    Logger.LogCritical(ex, "There was an exception trying to scrape labor market with id {id}", laborMarket.Id);
+                    try
+                    {
+                        await UpdateRequests(laborMarket);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogCritical(ex, "There was an exception trying to scrape labor market with id {id}", laborMarket.Id);
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                Logger.LogCritical(ex, "There was an exception refreshing LaborMarketRequests");
+            }
+            
         }
     }
 
@@ -94,7 +102,19 @@ public class LaborMarketScraper : Singleton
             return;
         }
 
-        ulong peakBlockHeight = logs.Max(x => x.Log.BlockNumber.ToUlong());
+        uint minimumFailedHeight = 0;
+
+        foreach (var log in logs)
+        {
+            if(!await ProcessLogAsync(laborMarket.Id, log))
+            {
+                minimumFailedHeight = Math.Min((uint)log.Log.BlockNumber.Value, minimumFailedHeight);
+            }
+        }
+
+        ulong peakBlockHeight = minimumFailedHeight > 0
+            ? minimumFailedHeight - 1
+            : logs.Max(x => x.Log.BlockNumber.ToUlong());
 
         using var scope = Provider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ChallengeDBContext>();
@@ -103,14 +123,9 @@ public class LaborMarketScraper : Singleton
         laborMarket.LastUpdatedAtBlockHeight = peakBlockHeight;
 
         await dbContext.SaveChangesAsync();
-
-        foreach (var log in logs)
-        {
-            await ProcessLogAsync(laborMarket.Id, log);
-        }
     }
 
-    private async Task ProcessLogAsync(long laborMarketId, EventLog<LaborMarketContract.RequestConfiguredEventDTO> log)
+    private async Task<bool> ProcessLogAsync(long laborMarketId, EventLog<LaborMarketContract.RequestConfiguredEventDTO> log)
     {
         var transactionScope = new TransactionScope(TransactionScopeOption.Required,
             new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted },
@@ -160,6 +175,11 @@ public class LaborMarketScraper : Singleton
             BackgroundJob.Enqueue<SharingTaskRunner>(runner => runner.ShareLaborMarketRequest(request.Id));
 
             transactionScope.Complete();
+            return true;
+        }
+        catch
+        {
+            return false;
         }
         finally
         {
