@@ -91,9 +91,12 @@ public class LaborMarketScraper : Singleton
     private async Task UpdateRequests(LaborMarket laborMarket)
     {
         var contract = SmartContractService.GetLaborMarket(laborMarket.Address);
+        var peakBlockHeight = await SmartContractService.GetPeakBlockHeightAsync();
+
         var configuredEvent = contract.GetEvent<LaborMarketContract.RequestConfiguredEventDTO>();
         var filter = configuredEvent.CreateFilterInput(
-            fromBlock: new BlockParameter(laborMarket.LastUpdatedAtBlockHeight + 1), toBlock: BlockParameter.CreateLatest());
+            fromBlock: new BlockParameter(laborMarket.LastUpdatedAtBlockHeight + 1), 
+            toBlock: new BlockParameter(new HexBigInteger(peakBlockHeight - 150)));
         var logs = await configuredEvent.GetAllChangesAsync(filter);
 
         if (logs.Count == 0)
@@ -112,7 +115,7 @@ public class LaborMarketScraper : Singleton
             }
         }
 
-        ulong peakBlockHeight = minimumFailedHeight > 0
+        ulong processingPeakHeight = minimumFailedHeight > 0
             ? minimumFailedHeight - 1
             : logs.Max(x => x.Log.BlockNumber.ToUlong());
 
@@ -120,7 +123,7 @@ public class LaborMarketScraper : Singleton
         var dbContext = scope.ServiceProvider.GetRequiredService<ChallengeDBContext>();
 
         dbContext.LaborMarkets.Attach(laborMarket);
-        laborMarket.LastUpdatedAtBlockHeight = peakBlockHeight;
+        laborMarket.LastUpdatedAtBlockHeight = processingPeakHeight;
 
         await dbContext.SaveChangesAsync();
     }

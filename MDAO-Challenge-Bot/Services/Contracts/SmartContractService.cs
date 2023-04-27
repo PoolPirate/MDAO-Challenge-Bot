@@ -1,7 +1,9 @@
 ﻿using Common.Services;
 using MDAO_Challenge_Bot.Contracts;
 using Nethereum.Contracts;
+using Nethereum.Hex.HexTypes;
 using Nethereum.Web3;
+using System.Numerics;
 
 namespace MDAO_Challenge_Bot.Services.Contracts;
 public class SmartContractService : Singleton
@@ -12,6 +14,11 @@ public class SmartContractService : Singleton
     public Contract GetLaborMarket(string address)
     {
         return Web3.Eth.GetContract(LaborMarketContract.ABI, address);
+    }
+
+    public async Task<BigInteger> GetPeakBlockHeightAsync()
+    {
+        return await Web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
     }
 
     public async Task<T> DecodeContractCallAsync<T>(string transactionHash)
