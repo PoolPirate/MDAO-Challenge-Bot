@@ -12,5 +12,7 @@ public class TokenContract
     public virtual List<LaborMarketRequest>? LaborMarketRequestUsages { get; set; } //Navigation Property
 
     public double DecimalsAdjust(BigInteger amount)
-        => Math.Exp(BigInteger.Log(amount) - BigInteger.Log(BigInteger.Pow(10, Decimals)));
+    {
+        return Math.Exp(BigInteger.Log(amount) - BigInteger.Log(BigInteger.Pow(10, Decimals)));
+    }
 }

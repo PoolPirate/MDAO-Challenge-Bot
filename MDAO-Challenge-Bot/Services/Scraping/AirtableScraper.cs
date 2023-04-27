@@ -1,5 +1,6 @@
 ﻿using AirtableApiClient;
 using Common.Services;
+using Hangfire;
 using MDAO_Challenge_Bot.Models;
 using MDAO_Challenge_Bot.Options;
 using MDAO_Challenge_Bot.Persistence;
@@ -7,6 +8,7 @@ using MDAO_Challenge_Bot.Services.Sharing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Transactions;
 
 namespace MDAO_Challenge_Bot.Services.Scraping;
 public class AirtableScraper : Singleton
@@ -15,8 +17,6 @@ public class AirtableScraper : Singleton
 
     [Inject]
     private readonly AirtableOptions AirtableOptions = null!;
-    [Inject]
-    private readonly SharingService SharingService = null!;
     [Inject]
     private readonly AirtableBase AirtableClient = null!;
 
@@ -52,6 +52,9 @@ public class AirtableScraper : Singleton
 
     private async Task ProcessChallengesAsync(AirtableChallenge[] challenges)
     {
+        using var transactionScope = new TransactionScope(TransactionScopeOption.Required,
+            new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted },
+            TransactionScopeAsyncFlowOption.Enabled);
         using var scope = Provider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ChallengeDBContext>();
 
@@ -65,12 +68,9 @@ public class AirtableScraper : Singleton
             dbContext.AirtableChallenges.Add(challenge);
             await dbContext.SaveChangesAsync();
 
-            await HandleNewChallengeAsync(challenge);
+            BackgroundJob.Enqueue<SharingTaskRunner>(runner => runner.ShareAirtableChallengeAsync(challenge.Id));
         }
-    }
 
-    private async Task HandleNewChallengeAsync(AirtableChallenge challenge)
-    {
-        await SharingService.ShareAirtableChallengeAsync(challenge);
+        transactionScope.Complete();
     }
 }

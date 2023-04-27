@@ -2,7 +2,6 @@
 using MDAO_Challenge_Bot.Entities;
 using MDAO_Challenge_Bot.Models;
 using Microsoft.Extensions.Logging;
-using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace MDAO_Challenge_Bot.Services.Sharing;
 public class SharingService : Singleton

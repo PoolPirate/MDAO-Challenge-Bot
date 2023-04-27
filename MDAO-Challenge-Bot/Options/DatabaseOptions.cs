@@ -4,4 +4,5 @@ namespace MDAO_Challenge_Bot.Options;
 public class DatabaseOptions : Option
 {
     public required string PostgresConnectionString { get; set; }
+    public required string HangfireConnectionString { get; set; }
 }

@@ -24,10 +24,7 @@ namespace MDAO_Challenge_Bot.Migrations
                     Symbol = table.Column<string>(type: "text", nullable: false),
                     Decimals = table.Column<byte>(type: "smallint", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TokenContracts", x => x.Address);
-                });
+                constraints: table => table.PrimaryKey("PK_TokenContracts", x => x.Address));
 
             migrationBuilder.CreateIndex(
                 name: "IX_LaborMarketRequests_PaymentTokenAddress",

@@ -1,7 +1,9 @@
 ﻿using AirtableApiClient;
 using Common.Extensions;
-using Discord;
 using Discord.Webhook;
+using Hangfire;
+using Hangfire.PostgreSql;
+using MDAO_Challenge_Bot.Hangfire;
 using MDAO_Challenge_Bot.Options;
 using MDAO_Challenge_Bot.Persistence;
 using MDAO_Challenge_Bot.Services.Scraping;
@@ -9,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Nethereum.Web3;
 using Polly;
 using Polly.Contrib.WaitAndRetry;
@@ -26,6 +29,7 @@ public class Program
         Host = CreateHost(args);
 
         ValidateOptions();
+        ConfigureHangfire();
 
         await MigrateDatabaseAsync();
 
@@ -81,9 +85,22 @@ public class Program
 
     private static void ValidateOptions()
     {
-        Program.Assembly.GetApplicationOptionTypes()
+        _ = Assembly.GetApplicationOptionTypes()
             .Select(x => Host.Services.GetRequiredService(x))
             .ToArray();
+    }
+
+    private static void ConfigureHangfire()
+    {
+        var dbOptions = Host.Services.GetRequiredService<DatabaseOptions>();
+        var loggerFac = Host.Services.GetRequiredService<ILoggerFactory>();
+        var scopeFac = Host.Services.GetRequiredService<IServiceScopeFactory>();
+        var storage = new PostgreSqlStorage(dbOptions.HangfireConnectionString);
+
+        GlobalConfiguration.Configuration
+        .UseLogProvider(new ILoggerLogProvider(loggerFac))
+        .UseActivator(new IServiceProviderJobActivator(scopeFac))
+        .UseStorage(storage);
     }
 
     private static async Task MigrateDatabaseAsync()

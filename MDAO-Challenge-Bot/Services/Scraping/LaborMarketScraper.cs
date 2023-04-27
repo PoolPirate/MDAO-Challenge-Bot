@@ -1,4 +1,5 @@
 ﻿using Common.Services;
+using Hangfire;
 using MDAO_Challenge_Bot.Contracts;
 using MDAO_Challenge_Bot.Entities;
 using MDAO_Challenge_Bot.Models;
@@ -8,21 +9,21 @@ using MDAO_Challenge_Bot.Services.Sharing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Nethereum.Contracts;
 using Nethereum.Contracts.Standards.ERC20;
 using Nethereum.Hex.HexTypes;
 using Nethereum.RPC.Eth.DTOs;
+using System.Transactions;
 
 namespace MDAO_Challenge_Bot.Services.Scraping;
 public class LaborMarketScraper : Singleton
 {
-    private const int UpdateInterval = 10000;
+    private const int UpdateInterval = 100000;
 
     [Inject]
     private readonly SmartContractService SmartContractService = null!;
     [Inject]
     private readonly Contracts.ERC20ContractService ERC20ContractService = null!;
-    [Inject]
-    private readonly SharingService SharingService = null!;
     [Inject]
     private readonly IPFSClient IPFSClient = null!;
 
@@ -101,28 +102,44 @@ public class LaborMarketScraper : Singleton
         dbContext.LaborMarkets.Attach(laborMarket);
         laborMarket.LastUpdatedAtBlockHeight = peakBlockHeight;
 
-        var requests = new List<LaborMarketRequest>();
+        await dbContext.SaveChangesAsync();
 
         foreach (var log in logs)
         {
+            await ProcessLogAsync(laborMarket.Id, log);
+        }
+    }
+
+    private async Task ProcessLogAsync(long laborMarketId, EventLog<LaborMarketContract.RequestConfiguredEventDTO> log)
+    {
+        var transactionScope = new TransactionScope(TransactionScopeOption.Required,
+            new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted },
+            TransactionScopeAsyncFlowOption.Enabled);
+
+        try
+        {
+            using var scope = Provider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ChallengeDBContext>();
+
             var contractCall = await SmartContractService.DecodeContractCallAsync<LaborMarketContract.SubmitRequestFunctionDTO>(
                 log.Log.TransactionHash);
 
             var metadata = await IPFSClient.GetJsonAsync<LaborMarketRequestMetadata>(contractCall.Uri);
 
             var paymentToken = await dbContext.TokenContracts
-                .FindAsync(contractCall.PaymentToken)
-                ?? new Entities.TokenContract()
+                .Where(x => x.Address == contractCall.PaymentToken)
+                .SingleOrDefaultAsync()
+                ?? new TokenContract()
                 {
                     Address = contractCall.PaymentToken,
                     Symbol = await ERC20ContractService.GetSymbolAsync(contractCall.PaymentToken),
                     Decimals = await ERC20ContractService.GetDecimalsAsync(contractCall.PaymentToken),
                 };
 
-            requests.Add(new LaborMarketRequest()
+            var request = new LaborMarketRequest()
             {
                 RequestId = (long)log.Event.RequestId,
-                LaborMarketId = laborMarket.Id,
+                LaborMarketId = laborMarketId,
                 Requester = log.Event.Requester,
                 IPFSUri = contractCall.Uri,
                 PaymentTokenAddress = log.Event.PaymentToken,
@@ -135,20 +152,18 @@ public class LaborMarketScraper : Singleton
                 Language = metadata.Language,
                 ProjectSlugs = metadata.ProjectSlugs,
                 PaymentToken = paymentToken
-            });
+            };
+
+            dbContext.LaborMarketRequests.Add(request);
+            await dbContext.SaveChangesAsync();
+
+            BackgroundJob.Enqueue<SharingTaskRunner>(runner => runner.ShareLaborMarketRequest(request.Id));
+
+            transactionScope.Complete();
         }
-
-        dbContext.LaborMarketRequests.AddRange(requests);
-        await dbContext.SaveChangesAsync();
-
-        foreach (var request in requests)
+        finally
         {
-            await HandleNewRequestAsync(laborMarket, request, request.PaymentToken!);
+            transactionScope.Dispose();
         }
-    }
-
-    private async Task HandleNewRequestAsync(LaborMarket laborMarket, LaborMarketRequest request, TokenContract paymentToken)
-    {
-        await SharingService.ShareLaborMarketRequestAsync(laborMarket, request, paymentToken);
     }
 }
