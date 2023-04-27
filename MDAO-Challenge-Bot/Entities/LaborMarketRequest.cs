@@ -15,9 +15,9 @@ public class LaborMarketRequest
     public required string PaymentTokenAddress { get; init; }
     public required BigInteger PaymentTokenAmount { get; init; }
 
-    public required ulong ClaimSubmitExpiration { get; init; }
-    public required ulong SubmitExpiration { get; init; }
-    public required ulong ReviewExpiration { get; init; }
+    public required long ClaimSubmitExpiration { get; init; }
+    public required long SubmitExpiration { get; init; }
+    public required long ReviewExpiration { get; init; }
 
     public required string Title { get; init; }
     public required string? Description { get; init; }
