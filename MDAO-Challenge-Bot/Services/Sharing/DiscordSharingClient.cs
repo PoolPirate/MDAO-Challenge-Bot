@@ -36,8 +36,7 @@ public class DiscordSharingClient : Singleton
                 "Reward Pool",
                 $"{MathUtils.RoundToSignificantDigits(paymentToken.DecimalsAdjust(request.PaymentTokenAmount), 4)} {paymentToken.Symbol}", true)
             .AddField("Marketplace", laborMarket.Name, true)
-            .AddField("", "")
-            .AddField("Claim to submit deadline", $"<t:{request.ClaimSubmitExpiration}:R>", true)
+            .AddField("Claim to submit deadline", $"<t:{request.ClaimSubmitExpiration}:R>")
             .AddField("Submission deadline", $"<t:{request.SubmitExpiration}:R>", true)
             .AddField("Reviewer deadline", $"<t:{request.ReviewExpiration}:R>", true)
             .AddField("Claim Now", $"https://metricsdao.xyz/app/market/{laborMarket.Address}/request/{request.RequestId}")
