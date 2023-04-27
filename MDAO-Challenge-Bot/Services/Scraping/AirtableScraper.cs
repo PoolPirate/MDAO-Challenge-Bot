@@ -29,6 +29,12 @@ public class AirtableScraper : Singleton
 
     protected override async ValueTask RunAsync()
     {
+        if (!AirtableOptions.Enabled)
+        {
+            Logger.LogWarning("Airtable Scraping Disabled!");
+            return;
+        }
+
         while (await UpdateTimer.WaitForNextTickAsync())
         {
             try
