@@ -1,7 +1,6 @@
 ﻿using Common.Services;
 using MDAO_Challenge_Bot.Contracts;
 using Nethereum.Contracts;
-using Nethereum.Hex.HexTypes;
 using Nethereum.Web3;
 using System.Numerics;
 

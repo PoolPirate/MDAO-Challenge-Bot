@@ -1,5 +1,4 @@
-﻿using AirtableApiClient;
-using Common.Extensions;
+﻿using Common.Extensions;
 using Discord.Webhook;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -55,6 +54,10 @@ public class Program
            .AddTransientHttpErrorPolicy(policy =>
             policy.WaitAndRetryAsync(
                 Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(500), 4)));
+        services.AddHttpClient<AirtableChallengeClient>()
+           .AddTransientHttpErrorPolicy(policy =>
+            policy.WaitAndRetryAsync(
+                Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(500), 4)));
 
         services.AddApplication(configuration, Assembly);
 
@@ -68,12 +71,6 @@ public class Program
         {
             var sharingOptions = provider.GetRequiredService<SharingOptions>();
             return new DiscordWebhookClient(sharingOptions.DiscordWebhookURL);
-        });
-
-        services.AddSingleton(provider =>
-        {
-            var airtableOptions = provider.GetRequiredService<AirtableOptions>();
-            return new AirtableBase(airtableOptions.APIKey, airtableOptions.BaseId);
         });
 
         services.AddDbContextPool<ChallengeDBContext>((provider, options) =>

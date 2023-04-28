@@ -16,7 +16,6 @@ public class SharingTaskRunner : Scoped
     public async Task ShareAirtableChallengeAsync(long challengeId)
     {
         var challenge = await DbContext.AirtableChallenges
-            .Include(x => x.PaymentToken)
             .Where(x => x.Id == challengeId)
             .SingleOrDefaultAsync();
 

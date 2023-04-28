@@ -1,5 +1,4 @@
-﻿using AirtableApiClient;
-using Common.Services;
+﻿using Common.Services;
 using Hangfire;
 using MDAO_Challenge_Bot.Models;
 using MDAO_Challenge_Bot.Options;
@@ -13,12 +12,12 @@ using System.Transactions;
 namespace MDAO_Challenge_Bot.Services.Scraping;
 public class AirtableScraper : Singleton
 {
-    private const int UpdateInterval = 10000;
+    private const int UpdateInterval = 5000;
 
     [Inject]
-    private readonly AirtableOptions AirtableOptions = null!;
+    private readonly AirtableChallengeClient ChallengeClient = null!;
     [Inject]
-    private readonly AirtableBase AirtableClient = null!;
+    private readonly AirtableOptions AirtableOptions = null!;
 
     private readonly PeriodicTimer UpdateTimer;
 
@@ -39,15 +38,8 @@ public class AirtableScraper : Singleton
         {
             try
             {
-                var result = await AirtableClient.ListRecords<AirtableChallenge>(AirtableOptions.TableName);
-
-                if (!result.Success)
-                {
-                    Logger.LogCritical(result.AirtableApiError, "Airtable response unsuccessful!");
-                    continue;
-                }
-
-                await ProcessChallengesAsync(result.Records.Select(x => x.Fields).ToArray());
+                var challenges = await ChallengeClient.GetChallengesAsync();
+                await ProcessChallengesAsync(challenges);
             }
             catch (Exception ex)
             {
@@ -64,9 +56,17 @@ public class AirtableScraper : Singleton
         using var scope = Provider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ChallengeDBContext>();
 
-        foreach (var challenge in challenges)
+        var processingCutOff = await dbContext.AirtableChallenges.AnyAsync()
+            ? (
+                await dbContext.AirtableChallenges
+                .MaxAsync(x => x.StartTimestamp))
+                .AddDays(-5)
+            : DateTimeOffset.MinValue;
+
+        foreach (var challenge in challenges
+            .Where(x => x.StartTimestamp <= DateTimeOffset.UtcNow && x.EndTimestamp >= processingCutOff))
         {
-            if (await dbContext.AirtableChallenges.AnyAsync(x => x.Batch == challenge.Batch && x.Name == challenge.Name))
+            if (await dbContext.AirtableChallenges.AnyAsync(x => x.Title == challenge.Title))
             {
                 continue;
             }

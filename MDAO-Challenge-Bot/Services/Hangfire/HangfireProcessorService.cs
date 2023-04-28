@@ -1,6 +1,6 @@
 ﻿using Common.Services;
-using Hangfire.Server;
 using Hangfire;
+using Hangfire.Server;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 

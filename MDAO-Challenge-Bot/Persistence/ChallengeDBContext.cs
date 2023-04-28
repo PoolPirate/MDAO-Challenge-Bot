@@ -75,19 +75,11 @@ public class ChallengeDBContext : DbContext
             .UseIdentityAlwaysColumn();
             b.HasKey(x => x.Id);
 
-            b.Property(x => x.BountyProgram);
-            b.Property(x => x.Batch);
-            b.Property(x => x.Name);
-            b.Property(x => x.Description);
-            b.Property(x => x.Level);
-
-            b.Property(x => x.PaymentTokenAddress);
-
-            b.HasIndex(x => new { x.Batch, x.Name })
+            b.HasIndex(x => new { x.Title })
             .IsUnique();
 
-            b.Property(x => x.StartDate);
-            b.Property(x => x.EndDate);
+            b.Property(x => x.StartTimestamp);
+            b.Property(x => x.EndTimestamp);
 
             b.ToTable("AirtableChallenges");
         });
@@ -99,11 +91,6 @@ public class ChallengeDBContext : DbContext
 
             b.Property(x => x.Symbol);
             b.Property(x => x.Decimals);
-
-            b.HasMany(x => x.AirtableChallengeUsages)
-            .WithOne(x => x.PaymentToken)
-            .HasForeignKey(x => x.PaymentTokenAddress)
-            .OnDelete(DeleteBehavior.SetNull);
 
             b.HasMany(x => x.LaborMarketRequestUsages)
             .WithOne(x => x.PaymentToken)

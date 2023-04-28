@@ -15,8 +15,8 @@ public class DiscordSharingClient : Singleton
     {
         return new EmbedBuilder()
             .WithColor(Color.LightOrange)
-            .WithTitle(challenge.Name)
-            .AddField("Submission Deadline", $"<t:{challenge.EndDate.ToUnixTimeSeconds()}:R>")
+            .WithTitle(challenge.Title)
+            .AddField("Submission Deadline", $"<t:{challenge.EndTimestamp.ToUnixTimeSeconds()}:R>")
             .AddField("Claim now", "https://metricsdao.notion.site/Bounty-Programs-d4bac7f1908f412f8bf4ed349198e5fe")
             .Build();
     }

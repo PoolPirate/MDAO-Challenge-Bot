@@ -18,7 +18,7 @@ using System.Transactions;
 namespace MDAO_Challenge_Bot.Services.Scraping;
 public class LaborMarketScraper : Singleton
 {
-    private const int UpdateInterval = 10000;
+    private const int UpdateInterval = 20000;
 
     [Inject]
     private readonly SmartContractService SmartContractService = null!;
@@ -68,7 +68,7 @@ public class LaborMarketScraper : Singleton
             {
                 Logger.LogCritical(ex, "There was an exception refreshing LaborMarketRequests");
             }
-            
+
         }
     }
 
@@ -95,7 +95,7 @@ public class LaborMarketScraper : Singleton
 
         var configuredEvent = contract.GetEvent<LaborMarketContract.RequestConfiguredEventDTO>();
         var filter = configuredEvent.CreateFilterInput(
-            fromBlock: new BlockParameter(laborMarket.LastUpdatedAtBlockHeight + 1), 
+            fromBlock: new BlockParameter(laborMarket.LastUpdatedAtBlockHeight + 1),
             toBlock: new BlockParameter(new HexBigInteger(peakBlockHeight - 150)));
         var logs = await configuredEvent.GetAllChangesAsync(filter);
 
@@ -109,7 +109,7 @@ public class LaborMarketScraper : Singleton
 
         foreach (var log in logs)
         {
-            if(!await ProcessLogAsync(laborMarket.Id, log))
+            if (!await ProcessLogAsync(laborMarket.Id, log))
             {
                 minimumFailedHeight = Math.Min((uint)log.Log.BlockNumber.Value, minimumFailedHeight);
             }
