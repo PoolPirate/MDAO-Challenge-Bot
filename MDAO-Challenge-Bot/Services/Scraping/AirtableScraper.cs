@@ -12,7 +12,7 @@ using System.Transactions;
 namespace MDAO_Challenge_Bot.Services.Scraping;
 public class AirtableScraper : Singleton
 {
-    private const int UpdateInterval = 5000;
+    private const int UpdateInterval = 30000;
 
     [Inject]
     private readonly AirtableChallengeClient ChallengeClient = null!;
