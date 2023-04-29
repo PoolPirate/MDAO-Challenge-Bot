@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Globalization;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace MDAO_Challenge_Bot.Utils;
@@ -12,7 +13,10 @@ public class DateOnlyToDateTimeOffsetEDTMidnightConverter : JsonConverter<DateTi
         string? rawDate = reader.GetString();
 
         return !DateOnly.TryParse(rawDate, out var date)
-            ? DateTimeOffset.MinValue
+            ? DateTimeOffset.TryParse("4/28/2023, 3:59:00 PM UTC".Replace("UTC", "GMT"),
+                CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out var timestamp)
+                ? timestamp
+                : DateTimeOffset.MinValue
             : new DateTimeOffset(date.ToDateTime(Time), Offset).UtcDateTime;
     }
 
