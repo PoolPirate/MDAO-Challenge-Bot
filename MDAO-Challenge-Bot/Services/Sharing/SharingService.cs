@@ -15,6 +15,8 @@ public class SharingService : Singleton
 
     public async Task ShareAirtableChallengeAsync(AirtableChallenge challenge)
     {
+        Logger.LogInformation("Sharing AirtableChallenge: Id={id}", challenge.Id);
+
         if (!SharingOptions.ShareAirtable)
         {
             Logger.LogWarning("Skipping sharing AirtableChallenge: Sharing Disabled. Id={id}", challenge.Id);
@@ -31,14 +33,16 @@ public class SharingService : Singleton
 
     public async Task ShareLaborMarketRequestAsync(LaborMarket laborMarket, LaborMarketRequest request, TokenContract paymentToken)
     {
+        Logger.LogInformation("Sharing LaborMarketRequest: Market={marketId}, Id={id}", laborMarket.Id, request.Id);
+
         if (!SharingOptions.ShareAirtable)
         {
-            Logger.LogWarning("Skipping sharing LaborMarketRequest: Sharing Disabled. Id={id}", request.Id);
+            Logger.LogWarning("Skipping sharing LaborMarketRequest: Sharing Disabled. Market={marketId}, Id={id}", laborMarket.Id, request.Id);
             return;
         }
         if (request.ReviewExpiration < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
         {
-            Logger.LogWarning("Skipping sharing LaborMarketRequest: Expired. Id={id}", request.Id);
+            Logger.LogWarning("Skipping sharing LaborMarketRequest: Expired. Market={marketId}, Id={id}", laborMarket.Id, request.Id);
             return;
         }
 

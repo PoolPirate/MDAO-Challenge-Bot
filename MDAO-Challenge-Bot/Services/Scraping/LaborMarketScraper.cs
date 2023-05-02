@@ -111,7 +111,9 @@ public class LaborMarketScraper : Singleton
         {
             if (!await ProcessLogAsync(laborMarket.Id, log))
             {
-                minimumFailedHeight = Math.Min((uint)log.Log.BlockNumber.Value, minimumFailedHeight);
+                minimumFailedHeight = minimumFailedHeight > 0
+                    ? Math.Min((uint)log.Log.BlockNumber.Value, minimumFailedHeight)
+                    : 0;
             }
         }
 
@@ -180,8 +182,14 @@ public class LaborMarketScraper : Singleton
             transactionScope.Complete();
             return true;
         }
-        catch
+        catch (TaskCanceledException )
         {
+            Logger.LogWarning("There was a timeout while processing tx logs");
+            return false;
+        }
+        catch (Exception ex) 
+        {
+            Logger.LogCritical(ex ,"There was an exception while processing logs!");
             return false;
         }
         finally

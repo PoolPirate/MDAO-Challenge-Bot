@@ -41,6 +41,10 @@ public class AirtableScraper : Singleton
                 var challenges = await ChallengeClient.GetChallengesAsync();
                 await ProcessChallengesAsync(challenges);
             }
+            catch (TaskCanceledException)
+            {
+                Logger.LogWarning("There was a timeout while refreshing Airtables Challenges");
+            }
             catch (Exception ex)
             {
                 Logger.LogCritical(ex, "There was an exception refreshing Airtable Challenges");

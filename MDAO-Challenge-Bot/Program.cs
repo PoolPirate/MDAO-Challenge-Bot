@@ -51,7 +51,8 @@ public class Program
 
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddHttpClient<IPFSClient>()
+        services.AddHttpClient<IPFSClient>(
+            client => client.Timeout = TimeSpan.FromSeconds(300))
            .AddTransientHttpErrorPolicy(policy =>
             policy.WaitAndRetryAsync(
                 Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(500), 4)));
