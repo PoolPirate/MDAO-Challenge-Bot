@@ -17,7 +17,7 @@ public class DiscordSharingClient : Singleton
             .WithColor(Color.LightOrange)
             .WithTitle(challenge.Title)
             .AddField("Submission Deadline", $"<t:{challenge.EndTimestamp.ToUnixTimeSeconds()}:R>")
-            .AddField("Claim now", "https://metricsdao.notion.site/Bounty-Programs-d4bac7f1908f412f8bf4ed349198e5fe")
+            .AddField("Submit now", "https://metricsdao.notion.site/Bounty-Programs-d4bac7f1908f412f8bf4ed349198e5fe")
             .Build();
     }
 
