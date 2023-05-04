@@ -13,7 +13,7 @@ public class DateOnlyToDateTimeOffsetEDTMidnightConverter : JsonConverter<DateTi
         string? rawDate = reader.GetString();
 
         return !DateOnly.TryParse(rawDate, out var date)
-            ? DateTimeOffset.TryParse("4/28/2023, 3:59:00 PM UTC".Replace("UTC", "GMT"),
+            ? DateTimeOffset.TryParse(rawDate?.Replace("UTC", "GMT"),
                 CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out var timestamp)
                 ? timestamp
                 : DateTimeOffset.MinValue
