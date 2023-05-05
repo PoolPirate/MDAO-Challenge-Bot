@@ -17,7 +17,7 @@ public class AirtableChallengeClient : Singleton
             ?? throw new Exception("Airtable API returned null!");
 
         return challenges.Where(x => 
-            x.Title != "Bounty Question Template - 1. Question Example" &&
+            x.Status == AirtableChallengeStatus.Active &&
             x.StartTimestamp != DateTimeOffset.MinValue &&
             x.EndTimestamp != DateTimeOffset.MaxValue)
         .ToArray();

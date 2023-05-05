@@ -78,6 +78,8 @@ public class ChallengeDBContext : DbContext
             b.HasIndex(x => new { x.Title })
             .IsUnique();
 
+            b.Ignore(x => x.Status);
+
             b.Property(x => x.StartTimestamp);
             b.Property(x => x.EndTimestamp);
 

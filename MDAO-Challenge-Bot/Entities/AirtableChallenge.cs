@@ -8,6 +8,8 @@ public class AirtableChallenge
 
     public required string Title { get; init; }
 
+    public required string Status { get; init; }
+
     [JsonPropertyName("start_date")]
     [JsonConverter(typeof(DateOnlyToDateTimeOffsetEDTNoonConverter))]
     public DateTimeOffset StartTimestamp { get; init; }

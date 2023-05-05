@@ -64,7 +64,7 @@ public class AirtableScraper : Singleton
             ? (
                 await dbContext.AirtableChallenges
                 .MaxAsync(x => x.StartTimestamp))
-                .AddDays(-5)
+                .AddDays(-7)
             : DateTimeOffset.MinValue;
 
         foreach (var challenge in challenges
