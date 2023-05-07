@@ -38,10 +38,6 @@ public class Program
 
         Host.Services.RunApplication(Assembly.GetExecutingAssembly());
 
-        var scope = Host.Services.CreateScope();
-        var runner = scope.ServiceProvider.GetRequiredService<TwitterSharingRunner>();
-        await runner.ShareRecentChallengesAsync();
-
         await Host.RunAsync();
     }
 
