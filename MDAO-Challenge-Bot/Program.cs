@@ -6,6 +6,7 @@ using MDAO_Challenge_Bot.Hangfire;
 using MDAO_Challenge_Bot.Options;
 using MDAO_Challenge_Bot.Persistence;
 using MDAO_Challenge_Bot.Services.Scraping;
+using MDAO_Challenge_Bot.Services.Sharing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,8 +15,8 @@ using Microsoft.Extensions.Logging;
 using Nethereum.Web3;
 using Polly;
 using Polly.Contrib.WaitAndRetry;
-using System.Globalization;
 using System.Reflection;
+using Tweetinvi;
 
 namespace InsolvencyTracker.Crawler;
 
@@ -36,6 +37,10 @@ public class Program
         await Host.Services.InitializeApplicationAsync(Assembly.GetExecutingAssembly());
 
         Host.Services.RunApplication(Assembly.GetExecutingAssembly());
+
+        var scope = Host.Services.CreateScope();
+        var runner = scope.ServiceProvider.GetRequiredService<TwitterSharingRunner>();
+        await runner.ShareRecentChallengesAsync();
 
         await Host.RunAsync();
     }
@@ -71,8 +76,18 @@ public class Program
 
         services.AddSingleton(provider =>
         {
-            var sharingOptions = provider.GetRequiredService<SharingOptions>();
-            return new DiscordWebhookClient(sharingOptions.DiscordWebhookURL);
+            var discordOptions = provider.GetRequiredService<DiscordOptions>();
+            return new DiscordWebhookClient(discordOptions.DiscordWebhookURL);
+        });
+
+        services.AddSingleton<ITwitterClient>(provider =>
+        {
+            var twitterOptions = provider.GetRequiredService<TwitterOptions>();
+            return new TwitterClient(
+                twitterOptions.APIKey, 
+                twitterOptions.APIKeySecret,
+                twitterOptions.AccessToken,
+                twitterOptions.AccessTokenSecret);
         });
 
         services.AddDbContextPool<ChallengeDBContext>((provider, options) =>

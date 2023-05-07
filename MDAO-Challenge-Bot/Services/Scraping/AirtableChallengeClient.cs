@@ -16,7 +16,7 @@ public class AirtableChallengeClient : Singleton
         var challenges = await Client.GetFromJsonAsync<AirtableChallenge[]>(AirtableOptions.APIUrl)
             ?? throw new Exception("Airtable API returned null!");
 
-        return challenges.Where(x => 
+        return challenges.Where(x =>
             x.Status == AirtableChallengeStatus.Active &&
             x.StartTimestamp != DateTimeOffset.MinValue &&
             x.EndTimestamp != DateTimeOffset.MaxValue)

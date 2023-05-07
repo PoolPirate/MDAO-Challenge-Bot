@@ -17,4 +17,16 @@ public class AirtableChallenge
     [JsonPropertyName("end_date")]
     [JsonConverter(typeof(DateOnlyToDateTimeOffsetEDTMidnightConverter))]
     public DateTimeOffset EndTimestamp { get; init; }
+
+    public long? TweetId { get; private set; }
+
+    public void SetTweetId(long tweetId)
+    {
+        if (TweetId is not null)
+        {
+            throw new InvalidOperationException("TweetId already set");
+        }
+
+        TweetId = tweetId;
+    }
 }

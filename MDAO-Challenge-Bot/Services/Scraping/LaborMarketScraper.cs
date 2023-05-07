@@ -164,9 +164,9 @@ public class LaborMarketScraper : Singleton
                 IPFSUri = contractCall.Uri,
                 PaymentTokenAddress = log.Event.PaymentToken,
                 PaymentTokenAmount = log.Event.PaymentAmount,
-                ClaimSubmitExpiration = (long)log.Event.SignalExpiration,
-                SubmitExpiration = (long)log.Event.SubmissionExpiration,
-                ReviewExpiration = (long)log.Event.ReviewExpiration,
+                ClaimSubmitExpiration = DateTimeOffset.FromUnixTimeSeconds((long)log.Event.SignalExpiration),
+                SubmitExpiration = DateTimeOffset.FromUnixTimeSeconds((long)log.Event.SubmissionExpiration),
+                ReviewExpiration = DateTimeOffset.FromUnixTimeSeconds((long)log.Event.ReviewExpiration),
                 Title = metadata.Title,
                 Description = metadata.Description,
                 Language = metadata.Language,
@@ -182,14 +182,14 @@ public class LaborMarketScraper : Singleton
             transactionScope.Complete();
             return true;
         }
-        catch (TaskCanceledException )
+        catch (TaskCanceledException)
         {
             Logger.LogWarning("There was a timeout while processing tx logs");
             return false;
         }
-        catch (Exception ex) 
+        catch (Exception ex)
         {
-            Logger.LogCritical(ex ,"There was an exception while processing logs!");
+            Logger.LogCritical(ex, "There was an exception while processing logs!");
             return false;
         }
         finally

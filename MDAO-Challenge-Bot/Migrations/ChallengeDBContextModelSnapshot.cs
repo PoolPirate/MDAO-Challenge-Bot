@@ -60,6 +60,9 @@ namespace MDAO_Challenge_Bot.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<long?>("TweetId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Title")
@@ -100,8 +103,8 @@ namespace MDAO_Challenge_Bot.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("ClaimSubmitExpiration")
-                        .HasColumnType("bigint");
+                    b.Property<DateTimeOffset>("ClaimSubmitExpiration")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
@@ -133,15 +136,18 @@ namespace MDAO_Challenge_Bot.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<long>("ReviewExpiration")
-                        .HasColumnType("bigint");
+                    b.Property<DateTimeOffset>("ReviewExpiration")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<long>("SubmitExpiration")
-                        .HasColumnType("bigint");
+                    b.Property<DateTimeOffset>("SubmitExpiration")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<long?>("TweetId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 

@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MDAO_Challenge_Bot.Migrations
 {
     [DbContext(typeof(ChallengeDBContext))]
-    [Migration("20230425222002_PaymentTokens")]
-    partial class PaymentTokens
+    [Migration("20230507135945_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -51,43 +51,24 @@ namespace MDAO_Challenge_Bot.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Batch")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("BountyProgram")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasAnnotation("Relational:JsonPropertyName", "Bounty Program");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset>("EndDate")
+                    b.Property<DateTimeOffset>("EndTimestamp")
                         .HasColumnType("timestamp with time zone")
-                        .HasAnnotation("Relational:JsonPropertyName", "End Date");
+                        .HasAnnotation("Relational:JsonPropertyName", "end_date");
 
-                    b.Property<string>("Level")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PaymentTokenAddress")
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset>("StartDate")
+                    b.Property<DateTimeOffset>("StartTimestamp")
                         .HasColumnType("timestamp with time zone")
-                        .HasAnnotation("Relational:JsonPropertyName", "Start Date");
+                        .HasAnnotation("Relational:JsonPropertyName", "start_date");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long?>("TweetId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PaymentTokenAddress");
-
-                    b.HasIndex("Batch", "Name")
+                    b.HasIndex("Title")
                         .IsUnique();
 
                     b.ToTable("AirtableChallenges", (string)null);
@@ -125,8 +106,8 @@ namespace MDAO_Challenge_Bot.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
 
-                    b.Property<decimal>("ClaimSubmitExpiration")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<DateTimeOffset>("ClaimSubmitExpiration")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
@@ -158,15 +139,18 @@ namespace MDAO_Challenge_Bot.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal>("ReviewExpiration")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<DateTimeOffset>("ReviewExpiration")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<decimal>("SubmitExpiration")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<DateTimeOffset>("SubmitExpiration")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<long?>("TweetId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -178,16 +162,6 @@ namespace MDAO_Challenge_Bot.Migrations
                         .IsUnique();
 
                     b.ToTable("LaborMarketRequests", (string)null);
-                });
-
-            modelBuilder.Entity("MDAO_Challenge_Bot.Models.AirtableChallenge", b =>
-                {
-                    b.HasOne("MDAO_Challenge_Bot.Entities.TokenContract", "PaymentToken")
-                        .WithMany("AirtableChallengeUsages")
-                        .HasForeignKey("PaymentTokenAddress")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("PaymentToken");
                 });
 
             modelBuilder.Entity("MDAO_Challenge_Bot.Models.LaborMarketRequest", b =>
@@ -211,8 +185,6 @@ namespace MDAO_Challenge_Bot.Migrations
 
             modelBuilder.Entity("MDAO_Challenge_Bot.Entities.TokenContract", b =>
                 {
-                    b.Navigation("AirtableChallengeUsages");
-
                     b.Navigation("LaborMarketRequestUsages");
                 });
 

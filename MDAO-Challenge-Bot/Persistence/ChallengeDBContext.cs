@@ -65,6 +65,9 @@ public class ChallengeDBContext : DbContext
             b.Property(x => x.Language);
             b.Property(x => x.ProjectSlugs);
 
+            b.Property(x => x.TweetId)
+            .IsRequired(false);
+
             b.ToTable("LaborMarketRequests");
         });
 
@@ -82,6 +85,9 @@ public class ChallengeDBContext : DbContext
 
             b.Property(x => x.StartTimestamp);
             b.Property(x => x.EndTimestamp);
+
+            b.Property(x => x.TweetId)
+            .IsRequired(false);
 
             b.ToTable("AirtableChallenges");
         });
