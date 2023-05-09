@@ -51,9 +51,9 @@ public class DiscordSharingClient : Singleton
                     4)} {paymentToken.Symbol}", true)
             .AddField("Marketplace", laborMarket.Name, true)
             .AddField("\u200b", "\u200b")
-            .AddField("Claim to submit deadline", $"<t:{request.ClaimSubmitExpiration}:R>", true)
-            .AddField("Submission deadline", $"<t:{request.SubmitExpiration}:R>", true)
-            .AddField("Reviewer deadline", $"<t:{request.ReviewExpiration}:R>", true)
+            .AddField("Claim to submit deadline", $"<t:{request.ClaimSubmitExpiration.ToUnixTimeSeconds()}:R>", true)
+            .AddField("Submission deadline", $"<t:{request.SubmitExpiration.ToUnixTimeSeconds()}:R>", true)
+            .AddField("Reviewer deadline", $"<t:{request.ReviewExpiration.ToUnixTimeSeconds()}:R>", true)
             .AddField("Claim Now", $"https://metricsdao.xyz/app/market/{laborMarket.Address}/request/{request.RequestId}")
             .Build();
     }
