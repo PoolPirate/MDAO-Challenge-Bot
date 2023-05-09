@@ -1,6 +1,9 @@
 ﻿using Common.Extensions;
 using Discord.Webhook;
+using Google;
 using Google.Apis.Auth.OAuth2;
+using Google.Apis.Auth.OAuth2.Flows;
+using Google.Apis.Auth.OAuth2.Responses;
 using Google.Apis.Sheets.v4;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -9,6 +12,7 @@ using MDAO_Challenge_Bot.Options;
 using MDAO_Challenge_Bot.Persistence;
 using MDAO_Challenge_Bot.Services.Docs;
 using MDAO_Challenge_Bot.Services.Scraping;
+using MDAO_Challenge_Bot.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -70,13 +74,45 @@ public class Program
 
         services.AddSingleton(provider =>
         {
-            var googleDocsOptions = provider.GetRequiredService<GoogleOptions>();
+            var googleOptions = provider.GetRequiredService<GoogleOptions>();
+            var logger = provider.GetRequiredService<ILogger<UserCredential>>();
+            var factory = provider.GetRequiredService<ILoggerFactory>();
+
+            ApplicationContext.RegisterLogger(new GoogleLogger(factory, logger));
+
+            return new UserCredential(new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer()
+            {
+                ClientSecrets =
+                    new ClientSecrets()
+                    {
+                        ClientId = googleOptions.ClientId,
+                        ClientSecret = googleOptions.ClientSecret
+                    },
+                Scopes = new List<string>()
+                {
+                    "https://www.googleapis.com/auth/spreadsheets"
+                }
+
+            }),
+            googleOptions.UserId,
+            new TokenResponse()
+            {
+                AccessToken = null,
+                IssuedUtc = DateTime.UtcNow.AddDays(-7),
+                TokenType = "Bearer",
+                ExpiresInSeconds = 3600,
+                RefreshToken = googleOptions.RefreshToken,
+            });
+        });
+
+        services.AddSingleton(provider =>
+        {
+            var userCredential = provider.GetRequiredService<UserCredential>();
 
             return new SheetsService(new Google.Apis.Services.BaseClientService.Initializer()
             {
-                HttpClientInitializer = GoogleCredential.FromAccessToken(googleDocsOptions.AccessToken)
+                HttpClientInitializer = userCredential
             });
-
         });
 
         services.AddApplication(configuration, Assembly);
@@ -97,7 +133,7 @@ public class Program
         {
             var twitterOptions = provider.GetRequiredService<TwitterOptions>();
             return new TwitterClient(
-                twitterOptions.APIKey, 
+                twitterOptions.APIKey,
                 twitterOptions.APIKeySecret,
                 twitterOptions.AccessToken,
                 twitterOptions.AccessTokenSecret);

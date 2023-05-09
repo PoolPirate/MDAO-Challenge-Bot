@@ -6,8 +6,6 @@ using MDAO_Challenge_Bot.Models;
 using MDAO_Challenge_Bot.Options;
 using MDAO_Challenge_Bot.Utils;
 using Microsoft.Extensions.Logging;
-using Org.BouncyCastle.Asn1.Cmp;
-using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace MDAO_Challenge_Bot.Services.Sharing;
 public class DiscordSharingClient : Singleton

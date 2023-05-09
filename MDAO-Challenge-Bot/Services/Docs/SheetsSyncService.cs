@@ -1,12 +1,10 @@
 ﻿using Common.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
-using MDAO_Challenge_Bot.Models;
 using MDAO_Challenge_Bot.Options;
 using MDAO_Challenge_Bot.Persistence;
 using MDAO_Challenge_Bot.Utils;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -23,16 +21,19 @@ public class SheetsSyncService : Singleton
 
     private readonly PeriodicTimer SyncTimer = new PeriodicTimer(TimeSpan.FromHours(1));
 
-    protected override async ValueTask RunAsync()
+    protected override async ValueTask InitializeAsync()
     {
         if (!GoogleOptions.EnableSpreadSheetSync)
         {
             Logger.LogWarning("Spreadsheet sync is disabled! Exiting...");
             return;
-        } 
+        }
 
         await SyncSpreadSheetAsync();
+    }
 
+    protected override async ValueTask RunAsync()
+    {
         while (await SyncTimer.WaitForNextTickAsync(Lifetime.ApplicationStopping))
         {
             try

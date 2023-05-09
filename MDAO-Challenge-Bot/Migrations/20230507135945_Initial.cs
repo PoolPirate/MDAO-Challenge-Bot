@@ -23,10 +23,7 @@ namespace MDAO_Challenge_Bot.Migrations
                     EndTimestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     TweetId = table.Column<long>(type: "bigint", nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AirtableChallenges", x => x.Id);
-                });
+                constraints: table => table.PrimaryKey("PK_AirtableChallenges", x => x.Id));
 
             migrationBuilder.CreateTable(
                 name: "LaborMarket",
@@ -38,10 +35,7 @@ namespace MDAO_Challenge_Bot.Migrations
                     Name = table.Column<string>(type: "text", nullable: false),
                     LastUpdatedAtBlockHeight = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_LaborMarket", x => x.Id);
-                });
+                constraints: table => table.PrimaryKey("PK_LaborMarket", x => x.Id));
 
             migrationBuilder.CreateTable(
                 name: "TokenContracts",
@@ -51,10 +45,7 @@ namespace MDAO_Challenge_Bot.Migrations
                     Symbol = table.Column<string>(type: "text", nullable: false),
                     Decimals = table.Column<byte>(type: "smallint", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TokenContracts", x => x.Address);
-                });
+                constraints: table => table.PrimaryKey("PK_TokenContracts", x => x.Address));
 
             migrationBuilder.CreateTable(
                 name: "LaborMarketRequests",

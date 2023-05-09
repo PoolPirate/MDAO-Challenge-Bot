@@ -1,11 +1,6 @@
 ﻿using Common.Services;
 using Hangfire;
-using MDAO_Challenge_Bot.Entities;
-using MDAO_Challenge_Bot.Models;
 using MDAO_Challenge_Bot.Options;
-using MDAO_Challenge_Bot.Services.Twitter;
-using Microsoft.Extensions.Logging;
-using Tweetinvi;
 
 namespace MDAO_Challenge_Bot.Services.Sharing;
 public class TwitterSharingClient : Singleton

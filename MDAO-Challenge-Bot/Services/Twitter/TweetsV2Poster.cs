@@ -31,7 +31,7 @@ public class TweetsV2Poster : Singleton
                 {
                     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
                 };
-                
+
                 var content = JsonContent.Create(tweetParams, options: jsonOptions);
 
                 request.Query.Url = "https://api.twitter.com/2/tweets";

@@ -1,7 +1,6 @@
 ﻿using Common.Services;
 using MDAO_Challenge_Bot.Entities;
 using MDAO_Challenge_Bot.Models;
-using MDAO_Challenge_Bot.Options;
 using Microsoft.Extensions.Logging;
 
 namespace MDAO_Challenge_Bot.Services.Sharing;

@@ -40,6 +40,6 @@ public class MessageV2Poster : Singleton
         [JsonPropertyName("text")]
         public required string Text { get; set; } = string.Empty;
 
-        
+
     }
 }

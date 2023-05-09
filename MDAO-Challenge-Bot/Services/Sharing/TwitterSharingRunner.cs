@@ -2,16 +2,12 @@
 using Hangfire;
 using MDAO_Challenge_Bot.Entities;
 using MDAO_Challenge_Bot.Models;
-using MDAO_Challenge_Bot.Options;
 using MDAO_Challenge_Bot.Persistence;
 using MDAO_Challenge_Bot.Services.Twitter;
 using MDAO_Challenge_Bot.Utils;
 using Microsoft.EntityFrameworkCore;
 using System.Numerics;
 using System.Text;
-using Tweetinvi;
-using Tweetinvi.Models;
-using Tweetinvi.Parameters;
 
 namespace MDAO_Challenge_Bot.Services.Sharing;
 public class TwitterSharingRunner : Scoped
