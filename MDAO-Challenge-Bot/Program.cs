@@ -1,5 +1,6 @@
 ﻿using Common.Extensions;
 using Discord.Webhook;
+using Google.Apis.Docs.v1;
 using Hangfire;
 using Hangfire.PostgreSql;
 using MDAO_Challenge_Bot.Hangfire;
@@ -61,6 +62,14 @@ public class Program
            .AddTransientHttpErrorPolicy(policy =>
             policy.WaitAndRetryAsync(
                 Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(500), 4)));
+
+        services.AddSingleton(provider =>
+        {
+            return new DocsService(new Google.Apis.Services.BaseClientService.Initializer()
+            {
+
+            });
+        });
 
         services.AddApplication(configuration, Assembly);
 
