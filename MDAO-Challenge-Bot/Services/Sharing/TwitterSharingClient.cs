@@ -13,8 +13,6 @@ public class TwitterSharingClient : Singleton
     public const string TwitterTaskName = "Twitter-Sharing";
 
     [Inject]
-    private readonly MessageV2Poster MessageV2Poster = null!;
-    [Inject]
     private readonly TwitterOptions TwitterOptions = null!;
 
     protected override ValueTask RunAsync()
@@ -25,19 +23,5 @@ public class TwitterSharingClient : Singleton
             Cron.Daily(TwitterOptions.PostTime.Hour, TwitterOptions.PostTime.Minute));
 
         return base.RunAsync();
-    }
-
-    public async Task ShareLaborMarketRequestViaDMAsync(
-        LaborMarket laborMarket, LaborMarketRequest request, TokenContract paymentToken)
-    {
-        if (!TwitterOptions.EnableDMSharing)
-        {
-            Logger.LogWarning("Skipping sharing LaborMarketRequest with Id={id} via Twitter DM: Feature disabled", request.Id);
-            return;
-        }
-
-        await MessageV2Poster.PostMessageAsync(
-            $"New request posted: https://metricsdao.xyz/app/market/{laborMarket.Address}/request/{request.RequestId}", 
-            TwitterOptions.DMRecipient);
     }
 }

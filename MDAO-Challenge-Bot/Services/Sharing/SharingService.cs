@@ -9,8 +9,6 @@ public class SharingService : Singleton
 {
     [Inject]
     private readonly DiscordSharingClient DiscordSharingClient = null!;
-    [Inject]
-    private readonly TwitterSharingClient TwitterSharingClient = null!;
 
     public async Task ShareAirtableChallengeAsync(AirtableChallenge challenge)
     {
@@ -36,6 +34,5 @@ public class SharingService : Singleton
         }
 
         await DiscordSharingClient.ShareAsync(laborMarket, request, paymentToken);
-        await TwitterSharingClient.ShareLaborMarketRequestViaDMAsync(laborMarket, request, paymentToken);
     }
 }

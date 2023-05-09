@@ -9,7 +9,4 @@ public class TwitterOptions : Option
     public required string APIKeySecret { get; set; }
     public required string AccessToken { get; set; }
     public required string AccessTokenSecret { get; set; }
-
-    public required bool EnableDMSharing { get; set; }
-    public required long DMRecipient { get; set; }
 }

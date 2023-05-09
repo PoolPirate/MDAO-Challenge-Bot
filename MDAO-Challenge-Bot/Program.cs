@@ -1,13 +1,14 @@
 ﻿using Common.Extensions;
 using Discord.Webhook;
-using Google.Apis.Docs.v1;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Sheets.v4;
 using Hangfire;
 using Hangfire.PostgreSql;
 using MDAO_Challenge_Bot.Hangfire;
 using MDAO_Challenge_Bot.Options;
 using MDAO_Challenge_Bot.Persistence;
+using MDAO_Challenge_Bot.Services.Docs;
 using MDAO_Challenge_Bot.Services.Scraping;
-using MDAO_Challenge_Bot.Services.Sharing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,13 +63,20 @@ public class Program
            .AddTransientHttpErrorPolicy(policy =>
             policy.WaitAndRetryAsync(
                 Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(500), 4)));
+        services.AddHttpClient<SheetsSyncService>()
+           .AddTransientHttpErrorPolicy(policy =>
+            policy.WaitAndRetryAsync(
+                Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(500), 4)));
 
         services.AddSingleton(provider =>
         {
-            return new DocsService(new Google.Apis.Services.BaseClientService.Initializer()
-            {
+            var googleDocsOptions = provider.GetRequiredService<GoogleOptions>();
 
+            return new SheetsService(new Google.Apis.Services.BaseClientService.Initializer()
+            {
+                HttpClientInitializer = GoogleCredential.FromAccessToken(googleDocsOptions.AccessToken)
             });
+
         });
 
         services.AddApplication(configuration, Assembly);
@@ -82,7 +90,7 @@ public class Program
         services.AddSingleton(provider =>
         {
             var discordOptions = provider.GetRequiredService<DiscordOptions>();
-            return new DiscordWebhookClient(discordOptions.DiscordWebhookURL);
+            return new DiscordWebhookClient(discordOptions.WebhookURL);
         });
 
         services.AddSingleton<ITwitterClient>(provider =>
@@ -99,7 +107,7 @@ public class Program
         {
             var dbOptions = provider.GetRequiredService<DatabaseOptions>();
             options.UseNpgsql(dbOptions.PostgresConnectionString);
-        });
+        }, 6);
     }
 
     private static void ValidateOptions()
