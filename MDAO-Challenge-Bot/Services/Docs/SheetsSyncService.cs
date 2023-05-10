@@ -57,7 +57,7 @@ public class SheetsSyncService : Singleton
         var requests = await dbContext.LaborMarketRequests
             .Include(x => x.LaborMarket)
             .Include(x => x.PaymentToken)
-            .Where(x => x.ReviewExpiration > DateTimeOffset.UtcNow)
+            .Where(x => x.ClaimSubmitExpiration > DateTimeOffset.UtcNow)
             .ToListAsync();
 
         Logger.LogDebug("Clearing sheet...");
