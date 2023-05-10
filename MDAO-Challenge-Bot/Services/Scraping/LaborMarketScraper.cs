@@ -105,15 +105,15 @@ public class LaborMarketScraper : Singleton
             return;
         }
 
-        uint minimumFailedHeight = 0;
+        ulong minimumFailedHeight = 0;
 
         foreach (var log in logs)
         {
             if (!await ProcessLogAsync(laborMarket.Id, log))
             {
                 minimumFailedHeight = minimumFailedHeight > 0
-                    ? Math.Min((uint)log.Log.BlockNumber.Value, minimumFailedHeight)
-                    : 0;
+                    ? Math.Min((ulong)log.Log.BlockNumber.Value, minimumFailedHeight)
+                    : (ulong)log.Log.BlockNumber.Value;
             }
         }
 
