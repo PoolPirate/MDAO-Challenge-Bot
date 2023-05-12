@@ -1,11 +1,6 @@
 ﻿using Common.Services;
 using MDAO_Challenge_Bot.Options;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Telegram.BotAPI;
 using Telegram.BotAPI.AvailableMethods;
 

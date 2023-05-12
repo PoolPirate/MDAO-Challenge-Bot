@@ -3,6 +3,7 @@ using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using MDAO_Challenge_Bot.Options;
 using MDAO_Challenge_Bot.Persistence;
+using MDAO_Challenge_Bot.Services.Sharing;
 using MDAO_Challenge_Bot.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +15,8 @@ public class SheetsSyncService : Singleton
 {
     [Inject]
     private readonly SheetsService SheetsService = null!;
+    [Inject]
+    private readonly TelegramSharingClient TelegramSharingClient = null!;
     [Inject]
     private readonly GoogleOptions GoogleOptions = null!;
     [Inject]
@@ -64,9 +67,11 @@ public class SheetsSyncService : Singleton
         await SheetsService.Spreadsheets.Values.Clear(new ClearValuesRequest(), GoogleOptions.SpreadSheetId, "A1:Z32")
             .ExecuteAsync();
 
-        var request = SheetsService.Spreadsheets.Values.Update(new ValueRange()
+        if (requests.Count > 0)
         {
-            Values = requests.Select(request => (IList<object>)new List<object>()
+            var request = SheetsService.Spreadsheets.Values.Update(new ValueRange()
+            {
+                Values = requests.Select(request => (IList<object>)new List<object>()
                 {
                     request.Title,
                     request.Description!,
@@ -77,11 +82,14 @@ public class SheetsSyncService : Singleton
                     request.PaymentToken!.Decimals,
                     4)} {request.PaymentToken.Symbol}"
                 }).ToList()
-        }, GoogleOptions.SpreadSheetId, "A1:Z32");
+            }, GoogleOptions.SpreadSheetId, "A1:Z32");
 
-        request.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
-        await request.ExecuteAsync();
+            request.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+            await request.ExecuteAsync();
+        }
 
         Logger.LogInformation("Sync successful");
+
+        await TelegramSharingClient.ShareSyncNotificationAsync(requests.Count);
     }
 }
