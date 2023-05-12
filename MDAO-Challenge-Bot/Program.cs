@@ -22,6 +22,7 @@ using Nethereum.Web3;
 using Polly;
 using Polly.Contrib.WaitAndRetry;
 using System.Reflection;
+using Telegram.BotAPI;
 using Tweetinvi;
 
 namespace InsolvencyTracker.Crawler;
@@ -71,6 +72,12 @@ public class Program
            .AddTransientHttpErrorPolicy(policy =>
             policy.WaitAndRetryAsync(
                 Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(500), 4)));
+
+        services.AddSingleton(provider =>
+        {
+            var telegramOptions = provider.GetRequiredService<TelegramOptions>();
+            return new BotClient(telegramOptions.Token);
+        });
 
         services.AddSingleton(provider =>
         {
