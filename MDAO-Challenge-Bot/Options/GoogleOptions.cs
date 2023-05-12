@@ -8,7 +8,4 @@ public class GoogleOptions : Option
 
     public required string UserId { get; set; }
     public required string RefreshToken { get; set; }
-
-    public required bool EnableSpreadSheetSync { get; set; }
-    public required string SpreadSheetId { get; set; }
 }

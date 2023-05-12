@@ -68,7 +68,7 @@ public class Program
            .AddTransientHttpErrorPolicy(policy =>
             policy.WaitAndRetryAsync(
                 Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(500), 4)));
-        services.AddHttpClient<SheetsSyncService>()
+        services.AddHttpClient<SheetsSyncRunner>()
            .AddTransientHttpErrorPolicy(policy =>
             policy.WaitAndRetryAsync(
                 Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(500), 4)));

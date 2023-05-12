@@ -1,6 +1,7 @@
 ﻿using Common.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
+using Hangfire;
 using MDAO_Challenge_Bot.Options;
 using MDAO_Challenge_Bot.Persistence;
 using MDAO_Challenge_Bot.Services.Sharing;
@@ -11,60 +12,37 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace MDAO_Challenge_Bot.Services.Docs;
-public class SheetsSyncService : Singleton
+public class SheetsSyncRunner : Scoped
 {
     [Inject]
     private readonly SheetsService SheetsService = null!;
     [Inject]
     private readonly TelegramSharingClient TelegramSharingClient = null!;
     [Inject]
-    private readonly GoogleOptions GoogleOptions = null!;
+    private readonly SpreadSheetSyncOptions SyncOptions = null!;
     [Inject]
-    private readonly IHostApplicationLifetime Lifetime = null!;
+    private readonly ChallengeDBContext DbContext = null!;
+    [Inject]
+    private readonly ILogger<SheetsSyncRunner> Logger = null!;
 
-    private readonly PeriodicTimer SyncTimer = new PeriodicTimer(TimeSpan.FromHours(1));
-
-    protected override async ValueTask InitializeAsync()
+    public async Task SyncSpreadSheetAsync()
     {
-        if (!GoogleOptions.EnableSpreadSheetSync)
+        if (!SyncOptions.Enabled)
         {
-            Logger.LogWarning("Spreadsheet sync is disabled! Exiting...");
+            Logger.LogWarning("Skipping spreadsheet sync: Disabled");
             return;
         }
 
-        await SyncSpreadSheetAsync();
-    }
-
-    protected override async ValueTask RunAsync()
-    {
-        while (await SyncTimer.WaitForNextTickAsync(Lifetime.ApplicationStopping))
-        {
-            try
-            {
-                await SyncSpreadSheetAsync();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogInformation(ex, "There was an exception while trying to sync spreadsheet");
-            }
-        }
-    }
-
-    private async Task SyncSpreadSheetAsync()
-    {
         Logger.LogInformation("Syncing spreadsheet...");
 
-        using var scope = Provider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ChallengeDBContext>();
-
-        var requests = await dbContext.LaborMarketRequests
+        var requests = await DbContext.LaborMarketRequests
             .Include(x => x.LaborMarket)
             .Include(x => x.PaymentToken)
             .Where(x => x.ClaimSubmitExpiration > DateTimeOffset.UtcNow)
             .ToListAsync();
 
         Logger.LogDebug("Clearing sheet...");
-        await SheetsService.Spreadsheets.Values.Clear(new ClearValuesRequest(), GoogleOptions.SpreadSheetId, "A1:Z32")
+        await SheetsService.Spreadsheets.Values.Clear(new ClearValuesRequest(), SyncOptions.SpreadSheetId, "A1:Z32")
             .ExecuteAsync();
 
         if (requests.Count > 0)
@@ -82,7 +60,7 @@ public class SheetsSyncService : Singleton
                     request.PaymentToken!.Decimals,
                     4)} {request.PaymentToken.Symbol}"
                 }).ToList()
-            }, GoogleOptions.SpreadSheetId, "A1:Z32");
+            }, SyncOptions.SpreadSheetId, "A1:Z32");
 
             request.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
             await request.ExecuteAsync();

@@ -3,6 +3,7 @@
 namespace MDAO_Challenge_Bot.Options;
 public class TwitterOptions : Option
 {
+    public required bool EnableAutoPost { get; set; }
     public required TimeOnly PostTime { get; set; }
 
     public required string APIKey { get; set; }

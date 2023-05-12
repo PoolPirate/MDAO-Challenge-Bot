@@ -11,7 +11,7 @@ public class TelegramSharingClient : Singleton
     private readonly BotClient TelegramClient = null!;
 
     [Inject]
-    private readonly TelegramOptions TelegramOptions = null!;
+    private readonly SpreadSheetSyncOptions SyncOptions = null!;
 
     private static string SyncNotificationTemplate(int requestCount)
     {
@@ -24,14 +24,14 @@ public class TelegramSharingClient : Singleton
 
     public async Task ShareSyncNotificationAsync(int requestCount)
     {
-        if (!TelegramOptions.EnableSyncNotification)
+        if (!SyncOptions.EnableNotification)
         {
             Logger.LogWarning("Skipping Telegram sync notification: Disabled");
             return;
         }
 
         var message = SyncNotificationTemplate(requestCount);
-        await TelegramClient.SendMessageAsync(TelegramOptions.SyncNotificationChatId, message);
+        await TelegramClient.SendMessageAsync(SyncOptions.NotificationChatId, message);
 
         Logger.LogInformation("Successfully shared sync notification");
     }

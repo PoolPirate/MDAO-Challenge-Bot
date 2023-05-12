@@ -3,7 +3,7 @@ using Hangfire;
 using MDAO_Challenge_Bot.Options;
 
 namespace MDAO_Challenge_Bot.Services.Sharing;
-public class TwitterSharingClient : Singleton
+public class TwitterSharingScheduler : Singleton
 {
     public const string TwitterTaskName = "Twitter-Sharing";
 

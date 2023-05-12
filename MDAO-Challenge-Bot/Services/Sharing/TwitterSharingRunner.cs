@@ -2,10 +2,12 @@
 using Hangfire;
 using MDAO_Challenge_Bot.Entities;
 using MDAO_Challenge_Bot.Models;
+using MDAO_Challenge_Bot.Options;
 using MDAO_Challenge_Bot.Persistence;
 using MDAO_Challenge_Bot.Services.Twitter;
 using MDAO_Challenge_Bot.Utils;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Numerics;
 using System.Text;
 
@@ -16,6 +18,10 @@ public class TwitterSharingRunner : Scoped
     private readonly TweetsV2Poster TweetsV2Poster = null!;
     [Inject]
     private readonly ChallengeDBContext DbContext = null!;
+    [Inject]
+    private readonly TwitterOptions TwitterOptions = null!;
+    [Inject]
+    private readonly ILogger<TwitterSharingRunner> Logger = null!;
 
     private static string HeadingTemplate(int count, (TokenContract PaymentToken, BigInteger Amount)[] pricePools)
     {
@@ -59,9 +65,14 @@ public class TwitterSharingRunner : Scoped
             """;
     }
 
-    [AutomaticRetry(Attempts = 1)]
     public async Task ShareRecentChallengesAsync()
     {
+        if (!TwitterOptions.EnableAutoPost)
+        {
+            Logger.LogWarning("Skipping twitter post: Disabled");
+            return;
+        }
+
         var now = DateTimeOffset.UtcNow;
 
         var requests = await DbContext.LaborMarketRequests
@@ -72,6 +83,7 @@ public class TwitterSharingRunner : Scoped
 
         if (requests.Count == 0)
         {
+            Logger.LogWarning("Skipping twitter post: No requests found");
             return;
         }
 
@@ -103,5 +115,7 @@ public class TwitterSharingRunner : Scoped
         {
             await DbContext.SaveChangesAsync();
         }
+
+        Logger.LogInformation("Successfully published twitter post");
     }
 }
