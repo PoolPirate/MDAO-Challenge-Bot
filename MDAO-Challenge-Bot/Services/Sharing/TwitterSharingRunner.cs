@@ -1,5 +1,4 @@
 ﻿using Common.Services;
-using Hangfire;
 using MDAO_Challenge_Bot.Entities;
 using MDAO_Challenge_Bot.Models;
 using MDAO_Challenge_Bot.Options;
@@ -60,7 +59,9 @@ public class TwitterSharingRunner : Scoped
             🔗 Link: https://metricsdao.xyz/app/market/{laborMarket.Address}/request/{request.RequestId}
 
             🗓 Deadlines
+            
             Claim to submit: {request.ClaimSubmitExpiration:ddd, dd MMM HH:mm UTC}
+
             Final submission: {request.SubmitExpiration:ddd, dd MMM HH:mm UTC}
             """;
     }
