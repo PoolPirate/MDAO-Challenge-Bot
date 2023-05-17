@@ -1,14 +1,11 @@
 ﻿using Common.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
-using Hangfire;
 using MDAO_Challenge_Bot.Options;
 using MDAO_Challenge_Bot.Persistence;
 using MDAO_Challenge_Bot.Services.Sharing;
 using MDAO_Challenge_Bot.Utils;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace MDAO_Challenge_Bot.Services.Docs;

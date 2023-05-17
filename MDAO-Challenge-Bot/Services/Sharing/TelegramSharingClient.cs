@@ -15,7 +15,7 @@ public class TelegramSharingClient : Singleton
 
     private static string SyncNotificationTemplate(int requestCount)
     {
-        return 
+        return
         $"""
         Spreadsheet sync completed at {DateTimeOffset.UtcNow:f}
         {requestCount} challenges inserted.
@@ -30,7 +30,7 @@ public class TelegramSharingClient : Singleton
             return;
         }
 
-        var message = SyncNotificationTemplate(requestCount);
+        string message = SyncNotificationTemplate(requestCount);
         await TelegramClient.SendMessageAsync(SyncOptions.NotificationChatId, message);
 
         Logger.LogInformation("Successfully shared sync notification");
