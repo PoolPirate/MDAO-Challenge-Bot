@@ -42,26 +42,34 @@ public class SheetsSyncRunner : Scoped
         await SheetsService.Spreadsheets.Values.Clear(new ClearValuesRequest(), SyncOptions.SpreadSheetId, "A1:Z32")
             .ExecuteAsync();
 
-        if (requests.Count > 0)
+        var values = requests.Select(request => (IList<object>)new List<object>()
         {
-            var request = SheetsService.Spreadsheets.Values.Update(new ValueRange()
-            {
-                Values = requests.Select(request => (IList<object>)new List<object>()
-                {
-                    request.Title,
-                    request.Description!,
-                    $"https://metricsdao.xyz/app/market/{request.LaborMarket!.Address}/request/{request.RequestId}",
-                    request.SubmitExpiration.Date.ToShortDateString(),
-                    $"{MathUtils.DecimalAdjustAndRoundToSignificantDigits(
-                    request.PaymentTokenAmount,
-                    request.PaymentToken!.Decimals,
-                    4)} {request.PaymentToken.Symbol}"
-                }).ToList()
-            }, SyncOptions.SpreadSheetId, "A1:Z32");
+            request.Title,
+            request.Description!,
+            $"https://metricsdao.xyz/app/market/{request.LaborMarket!.Address}/request/{request.RequestId}",
+            request.SubmitExpiration.Date.ToShortDateString(),
+            $"{MathUtils.DecimalAdjustAndRoundToSignificantDigits(
+            request.PaymentTokenAmount,
+            request.PaymentToken!.Decimals,
+            4)} {request.PaymentToken.Symbol}"
+        }).ToList();
 
-            request.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
-            await request.ExecuteAsync();
-        }
+        values.Insert(0, new List<object>()
+            {
+                "Title",
+                "Description",
+                "Link",
+                "Final Submission",
+                "Payment"
+            });
+
+        var request = SheetsService.Spreadsheets.Values.Update(new ValueRange()
+        {
+            Values = values
+        }, SyncOptions.SpreadSheetId, "A1:Z32");
+
+        request.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+        await request.ExecuteAsync();
 
         Logger.LogInformation("Sync successful");
 

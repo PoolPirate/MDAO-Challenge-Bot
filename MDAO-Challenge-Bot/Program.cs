@@ -2,8 +2,6 @@
 using Discord.Webhook;
 using Google;
 using Google.Apis.Auth.OAuth2;
-using Google.Apis.Auth.OAuth2.Flows;
-using Google.Apis.Auth.OAuth2.Responses;
 using Google.Apis.Sheets.v4;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -87,38 +85,22 @@ public class Program
 
             ApplicationContext.RegisterLogger(new GoogleLogger(factory, logger));
 
-            return new UserCredential(new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer()
+            if (!File.Exists(googleOptions.ServiceAccountCredentialFile))
             {
-                ClientSecrets =
-                    new ClientSecrets()
-                    {
-                        ClientId = googleOptions.ClientId,
-                        ClientSecret = googleOptions.ClientSecret
-                    },
-                Scopes = new List<string>()
-                {
-                    "https://www.googleapis.com/auth/spreadsheets"
-                }
+                throw new FileNotFoundException($"Missing service account credentials file at {googleOptions.ServiceAccountCredentialFile}");
+            }
 
-            }),
-            googleOptions.UserId,
-            new TokenResponse()
-            {
-                AccessToken = null,
-                IssuedUtc = DateTime.UtcNow.AddDays(-7),
-                TokenType = "Bearer",
-                ExpiresInSeconds = 3600,
-                RefreshToken = googleOptions.RefreshToken,
-            });
+            var stream = File.OpenRead(googleOptions.ServiceAccountCredentialFile);
+            return ServiceAccountCredential.FromServiceAccountData(stream);
         });
 
         services.AddSingleton(provider =>
         {
-            var userCredential = provider.GetRequiredService<UserCredential>();
+            var credentials = provider.GetRequiredService<ServiceAccountCredential>();
 
             return new SheetsService(new Google.Apis.Services.BaseClientService.Initializer()
             {
-                HttpClientInitializer = userCredential
+                HttpClientInitializer = credentials
             });
         });
 
