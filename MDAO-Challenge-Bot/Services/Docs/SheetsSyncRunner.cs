@@ -35,7 +35,7 @@ public class SheetsSyncRunner : Scoped
         var requests = await DbContext.LaborMarketRequests
             .Include(x => x.LaborMarket)
             .Include(x => x.PaymentToken)
-            .Where(x => x.ClaimSubmitExpiration > DateTimeOffset.UtcNow)
+            .Where(x => x.ReviewExpiration > DateTimeOffset.UtcNow)
             .ToListAsync();
 
         Logger.LogDebug("Clearing sheet...");
@@ -48,6 +48,7 @@ public class SheetsSyncRunner : Scoped
             request.Description!,
             $"https://metricsdao.xyz/app/market/{request.LaborMarket!.Address}/request/{request.RequestId}",
             request.SubmitExpiration.Date.ToShortDateString(),
+            request.ReviewExpiration.Date.ToShortDateString(),
             $"{MathUtils.DecimalAdjustAndRoundToSignificantDigits(
             request.PaymentTokenAmount,
             request.PaymentToken!.Decimals,
@@ -60,6 +61,7 @@ public class SheetsSyncRunner : Scoped
                 "Description",
                 "Link",
                 "Final Submission",
+                "Reviewer Deadline",
                 "Payment"
             });
 

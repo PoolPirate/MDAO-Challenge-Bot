@@ -1,7 +1,6 @@
 ﻿using Common.Services;
 using Hangfire;
 using MDAO_Challenge_Bot.Options;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace MDAO_Challenge_Bot.Services.Docs;
 public class SheetsSyncScheduler : Singleton
