@@ -8,6 +8,8 @@ public class SharingService : Singleton
 {
     [Inject]
     private readonly DiscordSharingClient DiscordSharingClient = null!;
+    [Inject]
+    private readonly TelegramSharingClient TelegramSharingClient = null!;
 
     public async Task ShareAirtableChallengeAsync(AirtableChallenge challenge)
     {
@@ -33,5 +35,6 @@ public class SharingService : Singleton
         }
 
         await DiscordSharingClient.ShareAsync(laborMarket, request, paymentToken);
+        await TelegramSharingClient.ShareLaborMarketRequestAsync(laborMarket, request, paymentToken);
     }
 }

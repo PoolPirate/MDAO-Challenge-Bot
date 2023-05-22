@@ -7,7 +7,4 @@ public class SpreadSheetSyncOptions : Option
     public required string SpreadSheetId { get; set; }
     public required DayOfWeek SyncDay { get; set; }
     public required TimeOnly SyncTime { get; set; }
-
-    public required bool EnableNotification { get; set; }
-    public required long NotificationChatId { get; set; }
 }
