@@ -11,11 +11,6 @@ public class SheetsSyncScheduler : Singleton
     [Inject]
     private readonly SpreadSheetSyncOptions SyncOptions = null!;
 
-    protected override async ValueTask InitializeAsync()
-    {
-        await Provider.GetRequiredService<SheetsSyncRunner>().SyncSpreadSheetAsync();
-    }
-
     protected override ValueTask RunAsync()
     {
         RecurringJob.AddOrUpdate<SheetsSyncRunner>(
