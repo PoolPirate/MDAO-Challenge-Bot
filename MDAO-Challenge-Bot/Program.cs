@@ -83,12 +83,12 @@ public class Program
             var logger = provider.GetRequiredService<ILogger<UserCredential>>();
             var factory = provider.GetRequiredService<ILoggerFactory>();
 
-            ApplicationContext.RegisterLogger(new GoogleLogger(factory, logger));
-
             if (!File.Exists(googleOptions.ServiceAccountCredentialFile))
             {
                 throw new FileNotFoundException($"Missing service account credentials file at {googleOptions.ServiceAccountCredentialFile}");
             }
+
+            ApplicationContext.RegisterLogger(new GoogleLogger(factory, logger));
 
             var stream = File.OpenRead(googleOptions.ServiceAccountCredentialFile);
             return ServiceAccountCredential.FromServiceAccountData(stream);
