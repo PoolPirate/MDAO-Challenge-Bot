@@ -1,4 +1,5 @@
 ﻿using MDAO_Challenge_Bot.Entities;
+using MDAO_Challenge_Bot.Entities.LaborMarketSubscriptions;
 using MDAO_Challenge_Bot.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,6 +8,7 @@ public class ChallengeDBContext : DbContext
 {
     public DbSet<LaborMarket> LaborMarkets { get; set; }
     public DbSet<LaborMarketRequest> LaborMarketRequests { get; set; }
+    public DbSet<LaborMarketSubscription> LaborMarketSubscriptions { get; set; }
 
     public DbSet<AirtableChallenge> AirtableChallenges { get; set; }
 
@@ -32,6 +34,10 @@ public class ChallengeDBContext : DbContext
             b.Property(x => x.LastUpdatedAtBlockHeight);
 
             b.HasMany(x => x.Requests)
+            .WithOne(x => x.LaborMarket)
+            .HasForeignKey(x => x.LaborMarketId);
+
+            b.HasMany(x => x.Subscriptions)
             .WithOne(x => x.LaborMarket)
             .HasForeignKey(x => x.LaborMarketId);
 
@@ -69,6 +75,29 @@ public class ChallengeDBContext : DbContext
             .IsRequired(false);
 
             b.ToTable("LaborMarketRequests");
+        });
+
+        modelBuilder.Entity<LaborMarketSubscription>(b =>
+        {
+            b.Property(x => x.Id)
+            .ValueGeneratedOnAdd()
+            .UseIdentityAlwaysColumn();
+            b.HasKey(x => x.Id);
+
+            b.Property(x => x.LaborMarketId);
+
+            b.Property(x => x.Type);
+
+            b.HasDiscriminator(x => x.Type)
+            .HasValue<DiscordWebhookSubscription>(LaborMarketSubscriptionType.DiscordWebhook)
+            .IsComplete();
+
+            b.ToTable("LaborMarketSubscriptions");
+        });
+
+        modelBuilder.Entity<DiscordWebhookSubscription>(b =>
+        {
+            b.Property(x => x.DiscordWebhookURL);
         });
 
         modelBuilder.Entity<AirtableChallenge>(b =>

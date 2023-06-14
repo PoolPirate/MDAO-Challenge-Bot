@@ -1,4 +1,6 @@
-﻿namespace MDAO_Challenge_Bot.Models;
+﻿using MDAO_Challenge_Bot.Entities;
+
+namespace MDAO_Challenge_Bot.Models;
 public class LaborMarket
 {
     public required long Id { get; init; }
@@ -7,5 +9,6 @@ public class LaborMarket
 
     public required ulong LastUpdatedAtBlockHeight { get; set; }
 
-    public virtual List<LaborMarketRequest>? Requests { get; init; } //Navigation Property
+    public virtual List<LaborMarketRequest>? Requests { get; private set; } //Navigation Property
+    public virtual List<LaborMarketSubscription>? Subscriptions { get; private set; } //Navigation Property
 }
