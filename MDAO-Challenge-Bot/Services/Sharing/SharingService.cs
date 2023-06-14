@@ -4,12 +4,16 @@ using MDAO_Challenge_Bot.Models;
 using Microsoft.Extensions.Logging;
 
 namespace MDAO_Challenge_Bot.Services.Sharing;
-public class SharingService : Singleton
+public class SharingService : Scoped
 {
+    [Inject]
+    private readonly ILogger<SharingService> Logger = null!;
     [Inject]
     private readonly DiscordSharingClient DiscordSharingClient = null!;
     [Inject]
     private readonly TelegramSharingClient TelegramSharingClient = null!;
+    [Inject]
+    private readonly SubscriptionSharingClient SubscriptionSharingClient = null!;
 
     public async Task ShareAirtableChallengeAsync(AirtableChallenge challenge)
     {
@@ -36,5 +40,6 @@ public class SharingService : Singleton
 
         await DiscordSharingClient.ShareAsync(laborMarket, request, paymentToken);
         await TelegramSharingClient.ShareLaborMarketRequestAsync(laborMarket, request, paymentToken);
+        await SubscriptionSharingClient.ShareAsync(laborMarket, request, paymentToken);
     }
 }

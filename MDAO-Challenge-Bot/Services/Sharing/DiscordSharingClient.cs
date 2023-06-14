@@ -38,7 +38,7 @@ public class DiscordSharingClient : Singleton
             embeds: new[] { MakeAirtableChallengeEmbed(challenge) });
     }
 
-    private static Embed MakeLaborMarketRequestEmbed(LaborMarket laborMarket, LaborMarketRequest request, TokenContract paymentToken)
+    private Embed MakeLaborMarketRequestEmbed(LaborMarket laborMarket, LaborMarketRequest request, TokenContract paymentToken)
     {
         return new EmbedBuilder()
             .WithColor(Color.Gold)
@@ -69,5 +69,14 @@ public class DiscordSharingClient : Singleton
         await WebhookClient.SendMessageAsync(
             username: laborMarket.Name,
             embeds: new[] { MakeLaborMarketRequestEmbed(laborMarket, request, paymentToken) });
+    }
+
+    public async Task ShareToWebhookAsync(string webhookUrl, LaborMarket laborMarket, LaborMarketRequest request, TokenContract paymentToken)
+    {
+        var client = new DiscordWebhookClient(webhookUrl);
+
+        await client.SendMessageAsync(
+        username: laborMarket.Name,
+        embeds: new[] { MakeLaborMarketRequestEmbed(laborMarket, request, paymentToken) });
     }
 }

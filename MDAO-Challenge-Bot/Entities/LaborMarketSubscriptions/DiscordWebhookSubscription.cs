@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace MDAO_Challenge_Bot.Entities.LaborMarketSubscriptions;
 public class DiscordWebhookSubscription : LaborMarketSubscription
 {
-    public required Uri DiscordWebhookURL { get; init; }
+    public required string DiscordWebhookURL { get; init; }
 
 	public DiscordWebhookSubscription()
 	{
