@@ -1,7 +1,7 @@
 ﻿using MDAO_Challenge_Bot.Models;
 
 namespace MDAO_Challenge_Bot.Entities;
-public class LaborMarketSubscription
+public abstract class LaborMarketSubscription
 {
     public required long Id { get; init; }
     public required long LaborMarketId { get; init; }
