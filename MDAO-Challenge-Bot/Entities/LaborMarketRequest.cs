@@ -26,8 +26,8 @@ public class LaborMarketRequest
 
     public long? TweetId { get; private set; }
 
-    public virtual LaborMarket? LaborMarket { get; private set; } //Navigation Property
-    public virtual TokenContract? PaymentToken { get; private set; } //Navigation Property
+    public virtual LaborMarket? LaborMarket { get; init; } //Navigation Property
+    public virtual TokenContract? PaymentToken { get; init; } //Navigation Property
 
     public void SetTweetId(long tweetId)
     {
