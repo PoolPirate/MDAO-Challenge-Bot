@@ -34,8 +34,9 @@ public class SheetsSyncRunner : Scoped
 
         var requests = await DbContext.LaborMarketRequests
             .Include(x => x.LaborMarket)
-            .Include(x => x.PaymentToken)
-            .Where(x => x.ReviewExpiration > DateTimeOffset.UtcNow)
+            .Include(x => x.ProviderPaymentToken)
+            .Include(x => x.ReviewerPaymentToken)
+            .Where(x => x.EnforcementExpiration > DateTimeOffset.UtcNow)
             .ToListAsync();
 
         Logger.LogDebug("Clearing sheet...");
@@ -47,12 +48,16 @@ public class SheetsSyncRunner : Scoped
             request.Title,
             request.Description!,
             $"https://metricsdao.xyz/app/market/{request.LaborMarket!.Address}/request/{request.RequestId}",
-            request.SubmitExpiration.Date.ToShortDateString(),
-            request.ReviewExpiration.Date.ToShortDateString(),
+            request.SubmissionExpiration.Date.ToShortDateString(),
+            request.EnforcementExpiration.Date.ToShortDateString(),
             $"{MathUtils.DecimalAdjustAndRoundToSignificantDigits(
-            request.PaymentTokenAmount,
-            request.PaymentToken!.Decimals,
-            4)} {request.PaymentToken.Symbol}"
+            request.ProviderPaymentAmount,
+            request.ProviderPaymentToken!.Decimals,
+            4)} {request.ProviderPaymentToken.Symbol}",
+            $"{MathUtils.DecimalAdjustAndRoundToSignificantDigits(
+            request.ReviewerPaymentAmount,
+            request.ReviewerPaymentToken!.Decimals,
+            4)} {request.ReviewerPaymentToken.Symbol}"
         }).ToList();
 
         values.Insert(0, new List<object>()
@@ -62,7 +67,8 @@ public class SheetsSyncRunner : Scoped
                 "Link",
                 "Final Submission",
                 "Reviewer Deadline",
-                "Payment"
+                "Provider Payment",
+                "Reviewer Payment"
             });
 
         var request = SheetsService.Spreadsheets.Values.Update(new ValueRange()

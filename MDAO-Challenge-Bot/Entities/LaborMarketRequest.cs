@@ -6,18 +6,24 @@ public class LaborMarketRequest
 {
     public long Id { get; init; }
 
-    public required long RequestId { get; init; }
+    public required BigInteger RequestId { get; init; }
     public required long LaborMarketId { get; init; }
 
     public required string Requester { get; init; }
     public required string IPFSUri { get; init; }
 
-    public required string PaymentTokenAddress { get; init; }
-    public required BigInteger PaymentTokenAmount { get; init; }
+    public required ulong ProviderLimit { get; init; }
+    public required ulong ReviewerLimit { get; init; }
 
-    public required DateTimeOffset ClaimSubmitExpiration { get; init; }
-    public required DateTimeOffset SubmitExpiration { get; init; }
-    public required DateTimeOffset ReviewExpiration { get; init; }
+    public required string ProviderPaymentTokenAddress { get; init; }
+    public required BigInteger ProviderPaymentAmount { get; init; }
+
+    public required string ReviewerPaymentTokenAddress { get; init; }
+    public required BigInteger ReviewerPaymentAmount { get; init; }
+
+    public required DateTimeOffset SignalExpiration { get; init; }
+    public required DateTimeOffset SubmissionExpiration { get; init; }
+    public required DateTimeOffset EnforcementExpiration { get; init; }
 
     public required string Title { get; init; }
     public required string? Description { get; init; }
@@ -27,7 +33,8 @@ public class LaborMarketRequest
     public long? TweetId { get; private set; }
 
     public virtual LaborMarket? LaborMarket { get; init; } //Navigation Property
-    public virtual TokenContract? PaymentToken { get; init; } //Navigation Property
+    public virtual TokenContract? ProviderPaymentToken { get; init; } //Navigation Property
+    public virtual TokenContract? ReviewerPaymentToken { get; init; } //Navigation Property
 
     public void SetTweetId(long tweetId)
     {

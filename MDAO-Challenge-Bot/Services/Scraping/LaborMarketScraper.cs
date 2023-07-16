@@ -12,7 +12,9 @@ using Microsoft.Extensions.Logging;
 using Nethereum.Contracts;
 using Nethereum.Contracts.Standards.ERC20;
 using Nethereum.Hex.HexTypes;
+using Nethereum.Model;
 using Nethereum.RPC.Eth.DTOs;
+using System.Numerics;
 using System.Transactions;
 
 namespace MDAO_Challenge_Bot.Services.Scraping;
@@ -56,7 +58,8 @@ public class LaborMarketScraper : Singleton
                 {
                     try
                     {
-                        await UpdateRequests(laborMarket);
+                        var peakBlockHeight = await SmartContractService.GetPeakBlockHeightAsync();
+                        await UpdateRequests(laborMarket, peakBlockHeight);
                     }
                     catch (Exception ex)
                     {
@@ -88,12 +91,11 @@ public class LaborMarketScraper : Singleton
         }
     }
 
-    private async Task UpdateRequests(LaborMarket laborMarket)
+    private async Task UpdateRequests(LaborMarket laborMarket, BigInteger peakBlockHeight)
     {
         var contract = SmartContractService.GetLaborMarket(laborMarket.Address);
-        var peakBlockHeight = await SmartContractService.GetPeakBlockHeightAsync();
-
         var configuredEvent = contract.GetEvent<LaborMarketContract.RequestConfiguredEventDTO>();
+
         var filter = configuredEvent.CreateFilterInput(
             fromBlock: new BlockParameter(laborMarket.LastUpdatedAtBlockHeight + 1),
             toBlock: new BlockParameter(new HexBigInteger(peakBlockHeight - 150)));
@@ -101,7 +103,6 @@ public class LaborMarketScraper : Singleton
 
         if (logs.Count == 0)
         {
-            Logger.LogDebug("Successfully refreshed requests for LaborMarket {id} ({name})", laborMarket.Id, laborMarket.Name);
             return;
         }
 
@@ -141,37 +142,39 @@ public class LaborMarketScraper : Singleton
             using var scope = Provider.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<ChallengeDBContext>();
 
-            var contractCall = await SmartContractService.DecodeContractCallAsync<LaborMarketContract.SubmitRequestFunctionDTO>(
-                log.Log.TransactionHash);
+            var metadata = await IPFSClient.GetJsonAsync<LaborMarketRequestMetadata>(log.Event.Uri);
 
-            var metadata = await IPFSClient.GetJsonAsync<LaborMarketRequestMetadata>(contractCall.Uri);
-
-            var paymentToken = await dbContext.TokenContracts
-                .Where(x => x.Address == contractCall.PaymentToken)
+            var providerPaymentToken = await dbContext.TokenContracts
+                .Where(x => x.Address == log.Event.ProviderPaymentTokenAddress)
                 .SingleOrDefaultAsync()
-                ?? new TokenContract()
-                {
-                    Address = contractCall.PaymentToken,
-                    Symbol = await ERC20ContractService.GetSymbolAsync(contractCall.PaymentToken),
-                    Decimals = await ERC20ContractService.GetDecimalsAsync(contractCall.PaymentToken),
-                };
+                ?? await LoadTokenContractAsync(log.Event.ProviderPaymentTokenAddress);
+
+            var reviewerPaymentToken = await dbContext.TokenContracts
+                .Where(x => x.Address == log.Event.ReviewerPaymentTokenAddress)
+                .SingleOrDefaultAsync()
+                ?? await LoadTokenContractAsync(log.Event.ReviewerPaymentTokenAddress);
 
             var request = new LaborMarketRequest()
             {
-                RequestId = (long)log.Event.RequestId,
+                RequestId = log.Event.RequestId,
                 LaborMarketId = laborMarketId,
                 Requester = log.Event.Requester,
-                IPFSUri = contractCall.Uri,
-                PaymentTokenAddress = log.Event.PaymentToken,
-                PaymentTokenAmount = log.Event.PaymentAmount,
-                ClaimSubmitExpiration = DateTimeOffset.FromUnixTimeSeconds((long)log.Event.SignalExpiration),
-                SubmitExpiration = DateTimeOffset.FromUnixTimeSeconds((long)log.Event.SubmissionExpiration),
-                ReviewExpiration = DateTimeOffset.FromUnixTimeSeconds((long)log.Event.ReviewExpiration),
+                IPFSUri = log.Event.Uri,
+                ProviderLimit = log.Event.ProviderLimit,
+                ReviewerLimit = log.Event.ReviewerLimit,
+                ProviderPaymentTokenAddress = log.Event.ProviderPaymentTokenAddress,
+                ProviderPaymentAmount = log.Event.ProviderPaymentAmount,
+                ReviewerPaymentTokenAddress = log.Event.ReviewerPaymentTokenAddress,
+                ReviewerPaymentAmount = log.Event.ReviewerPaymentAmount,
+                SignalExpiration = DateTimeOffset.FromUnixTimeSeconds((long)log.Event.SignalExpiration),
+                SubmissionExpiration = DateTimeOffset.FromUnixTimeSeconds((long)log.Event.SubmissionExpiration),
+                EnforcementExpiration = DateTimeOffset.FromUnixTimeSeconds((long)log.Event.EnforcementExpiration),
                 Title = metadata.Title,
                 Description = metadata.Description,
                 Language = metadata.Language,
                 ProjectSlugs = metadata.ProjectSlugs,
-                PaymentToken = paymentToken
+                ProviderPaymentToken = providerPaymentToken,
+                ReviewerPaymentToken = reviewerPaymentToken
             };
 
             dbContext.LaborMarketRequests.Add(request);
@@ -196,5 +199,15 @@ public class LaborMarketScraper : Singleton
         {
             transactionScope.Dispose();
         }
+    }
+
+    private async Task<TokenContract> LoadTokenContractAsync(string tokenAddress)
+    {
+        return new TokenContract()
+        {
+            Address = tokenAddress,
+            Symbol = await ERC20ContractService.GetSymbolAsync(tokenAddress),
+            Decimals = await ERC20ContractService.GetDecimalsAsync(tokenAddress),
+        };
     }
 }

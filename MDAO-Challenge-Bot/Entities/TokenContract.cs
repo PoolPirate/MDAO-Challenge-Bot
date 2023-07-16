@@ -8,8 +8,6 @@ public class TokenContract
     public required string Symbol { get; init; }
     public required byte Decimals { get; init; }
 
-    public virtual List<LaborMarketRequest>? LaborMarketRequestUsages { get; set; } //Navigation Property
-
     public double DecimalsAdjust(BigInteger amount)
     {
         return Math.Exp(BigInteger.Log(amount) - BigInteger.Log(BigInteger.Pow(10, Decimals)));

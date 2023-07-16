@@ -43,17 +43,29 @@ public class DiscordSharingClient : Singleton
         return new EmbedBuilder()
             .WithColor(Color.Gold)
             .WithTitle(request.Title)
-            .AddField(
-                "Reward Pool",
-                $"{MathUtils.DecimalAdjustAndRoundToSignificantDigits(
-                    request.PaymentTokenAmount,
-                    request.PaymentToken!.Decimals,
-                    4)} {paymentToken.Symbol}", true)
             .AddField("Marketplace", laborMarket.Name, true)
+            .AddField("Claims", $"""
+                Analysts: {request.ProviderLimit}
+                Reviewers: {request.ReviewerLimit}
+            """, true)
+            .AddField(
+                "Rewards",
+                $"""
+                Analysts: {MathUtils.DecimalAdjustAndRoundToSignificantDigits(
+                request.ProviderPaymentAmount,
+                request.ProviderPaymentToken!.Decimals, 4)} {request.ProviderPaymentToken.Symbol} ({MathUtils.DecimalAdjustAndRoundToSignificantDigits(
+                request.ProviderPaymentAmount / request.ProviderLimit,
+                request.ProviderPaymentToken!.Decimals, 4)} {request.ProviderPaymentToken.Symbol} each)
+                Reviewers: {MathUtils.DecimalAdjustAndRoundToSignificantDigits(
+                request.ReviewerPaymentAmount,
+                request.ReviewerPaymentToken!.Decimals, 4)} {request.ReviewerPaymentToken.Symbol} ({MathUtils.DecimalAdjustAndRoundToSignificantDigits(
+                request.ReviewerPaymentAmount / request.ReviewerLimit,
+                request.ReviewerPaymentToken!.Decimals, 4)} {request.ReviewerPaymentToken.Symbol} each)
+                """, true)
             .AddField("\u200b", "\u200b")
-            .AddField("Claim to submit deadline", $"<t:{request.ClaimSubmitExpiration.ToUnixTimeSeconds()}:R>", true)
-            .AddField("Submission deadline", $"<t:{request.SubmitExpiration.ToUnixTimeSeconds()}:R>", true)
-            .AddField("Reviewer deadline", $"<t:{request.ReviewExpiration.ToUnixTimeSeconds()}:R>", true)
+            .AddField("Claim to submit deadline", $"<t:{request.SignalExpiration.ToUnixTimeSeconds()}:R>", true)
+            .AddField("Submission deadline", $"<t:{request.SubmissionExpiration.ToUnixTimeSeconds()}:R>", true)
+            .AddField("Reviewer deadline", $"<t:{request.EnforcementExpiration.ToUnixTimeSeconds()}:R>", true)
             .AddField("Claim Now", $"https://metricsdao.xyz/app/market/{laborMarket.Address}/request/{request.RequestId}")
             .Build();
     }

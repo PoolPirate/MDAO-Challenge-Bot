@@ -32,7 +32,7 @@ public class SharingService : Scoped
     {
         Logger.LogInformation("Sharing LaborMarketRequest: Market={marketId}, Id={id}", laborMarket.Id, request.Id);
 
-        if (request.ReviewExpiration < DateTimeOffset.UtcNow)
+        if (request.EnforcementExpiration < DateTimeOffset.UtcNow)
         {
             Logger.LogWarning("Skipping sharing LaborMarketRequest: Expired. Market={marketId}, Id={id}", laborMarket.Id, request.Id);
             return;

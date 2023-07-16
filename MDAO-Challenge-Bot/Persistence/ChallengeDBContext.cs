@@ -59,12 +59,18 @@ public class ChallengeDBContext : DbContext
             b.Property(x => x.Requester);
             b.Property(x => x.IPFSUri);
 
-            b.Property(x => x.PaymentTokenAddress);
-            b.Property(x => x.PaymentTokenAmount);
+            b.Property(x => x.ProviderLimit);
+            b.Property(x => x.ReviewerLimit);
 
-            b.Property(x => x.ClaimSubmitExpiration);
-            b.Property(x => x.SubmitExpiration);
-            b.Property(x => x.ReviewExpiration);
+            b.Property(x => x.ProviderPaymentTokenAddress);
+            b.Property(x => x.ProviderPaymentAmount);
+
+            b.Property(x => x.ReviewerPaymentTokenAddress);
+            b.Property(x => x.ReviewerPaymentAmount);
+
+            b.Property(x => x.SignalExpiration);
+            b.Property(x => x.SubmissionExpiration);
+            b.Property(x => x.EnforcementExpiration);
 
             b.Property(x => x.Title);
             b.Property(x => x.Description);
@@ -73,6 +79,16 @@ public class ChallengeDBContext : DbContext
 
             b.Property(x => x.TweetId)
             .IsRequired(false);
+
+            b.HasOne(x => x.ProviderPaymentToken)
+            .WithMany()
+            .HasForeignKey(x => x.ProviderPaymentTokenAddress)
+            .OnDelete(DeleteBehavior.SetNull);
+
+            b.HasOne(x => x.ReviewerPaymentToken)
+            .WithMany()
+            .HasForeignKey(x => x.ReviewerPaymentTokenAddress)
+            .OnDelete(DeleteBehavior.SetNull);
 
             b.ToTable("LaborMarketRequests");
         });
@@ -128,11 +144,6 @@ public class ChallengeDBContext : DbContext
 
             b.Property(x => x.Symbol);
             b.Property(x => x.Decimals);
-
-            b.HasMany(x => x.LaborMarketRequestUsages)
-            .WithOne(x => x.PaymentToken)
-            .HasForeignKey(x => x.PaymentTokenAddress)
-            .OnDelete(DeleteBehavior.SetNull);
 
             b.ToTable("TokenContracts");
         });

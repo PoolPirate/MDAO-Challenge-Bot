@@ -32,7 +32,8 @@ public class SharingTaskRunner : Scoped
     {
         var request = await DbContext.LaborMarketRequests
             .Include(x => x.LaborMarket)
-            .Include(x => x.PaymentToken)
+            .Include(x => x.ProviderPaymentToken)
+            .Include(x => x.ReviewerPaymentToken)
             .Where(x => x.Id == requestId)
             .SingleOrDefaultAsync();
 
@@ -42,6 +43,6 @@ public class SharingTaskRunner : Scoped
             return;
         }
 
-        await SharingService.ShareLaborMarketRequestAsync(request.LaborMarket!, request, request.PaymentToken!);
+        await SharingService.ShareLaborMarketRequestAsync(request.LaborMarket!, request, request.ProviderPaymentToken!);
     }
 }

@@ -51,18 +51,23 @@ public class TwitterSharingRunner : Scoped
         return $"""
             📜 Title: {request.Title}
 
+            🔒 Claims: {request.ProviderLimit}
+
             💰 Value: {MathUtils.DecimalAdjustAndRoundToSignificantDigits(
-                                         request.PaymentTokenAmount,
+                                         request.ProviderPaymentAmount,
                                          paymentToken.Decimals,
-                                         4)} {paymentToken.Symbol}
+                                         4)} {paymentToken.Symbol} ({MathUtils.DecimalAdjustAndRoundToSignificantDigits(
+                                         request.ProviderPaymentAmount / request.ProviderLimit,
+                                         paymentToken.Decimals,
+                                         4)} {paymentToken.Symbol} each)
 
             🔗 Link: https://metricsdao.xyz/app/market/{laborMarket.Address}/request/{request.RequestId}
 
             🗓 Deadlines
             
-            Claim to submit: {request.ClaimSubmitExpiration:ddd, dd MMM HH:mm UTC}
+            Claim to submit: {request.SignalExpiration:ddd, dd MMM HH:mm UTC}
 
-            Final submission: {request.SubmitExpiration:ddd, dd MMM HH:mm UTC}
+            Final submission: {request.SubmissionExpiration:ddd, dd MMM HH:mm UTC}
             """;
     }
 
@@ -78,8 +83,9 @@ public class TwitterSharingRunner : Scoped
 
         var requests = await DbContext.LaborMarketRequests
             .Include(x => x.LaborMarket)
-            .Include(x => x.PaymentToken)
-            .Where(x => x.TweetId == null && x.ClaimSubmitExpiration > now)
+            .Include(x => x.ProviderPaymentToken)
+            .Include(x => x.ReviewerPaymentToken)
+            .Where(x => x.TweetId == null && x.SignalExpiration > now)
             .ToListAsync();
 
         if (requests.Count == 0)
@@ -88,10 +94,10 @@ public class TwitterSharingRunner : Scoped
             return;
         }
 
-        var pricePools = requests.GroupBy(x => x.PaymentToken)
+        var pricePools = requests.GroupBy(x => x.ProviderPaymentToken)
             .Select(x => (
                 PaymentToken: x.Key!,
-                Amount: x.Aggregate(BigInteger.Zero, (last, request) => last + request.PaymentTokenAmount)
+                Amount: x.Aggregate(BigInteger.Zero, (last, request) => last + request.ProviderPaymentAmount)
             )).ToArray();
 
         long latestTweetId = await TweetsV2Poster.PostTweetAsync(
@@ -101,7 +107,7 @@ public class TwitterSharingRunner : Scoped
         foreach (var request in requests)
         {
             latestTweetId = await TweetsV2Poster.PostTweetAsync(
-                    LaborMarketRequestTemplate(request.LaborMarket!, request, request.PaymentToken!),
+                    LaborMarketRequestTemplate(request.LaborMarket!, request, request.ProviderPaymentToken!),
                     latestTweetId
                 );
 

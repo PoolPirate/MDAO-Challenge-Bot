@@ -46,14 +46,14 @@ public class TelegramSharingClient : Singleton
         @sovsignal New challenge posted:
         Title: {request.Title}
         Value: {MathUtils.DecimalAdjustAndRoundToSignificantDigits(
-                                         request.PaymentTokenAmount,
+                                         request.ProviderPaymentAmount,
                                          paymentToken.Decimals,
                                          4)} {paymentToken.Symbol}
         Link: https://metricsdao.xyz/app/market/{laborMarket.Address}/request/{request.RequestId}
         
         Deadlines
-        Claim to submit: {request.ClaimSubmitExpiration:ddd, dd MMM HH:mm UTC}
-        Final submission: {request.SubmitExpiration:ddd, dd MMM HH:mm UTC}
+        Claim to submit: {request.SignalExpiration:ddd, dd MMM HH:mm UTC}
+        Final submission: {request.SubmissionExpiration:ddd, dd MMM HH:mm UTC}
         """;
     }
 
