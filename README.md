@@ -5,6 +5,6 @@ Providing the freshest [MetricsDAO](https://metricsdao.xyz/) bounty notification
 ## Workflow
 <img src="doc/structure.svg" />
 
-## Want to receive notifactions as well?
+## Want to receive notifications as well?
 
 Contact Playwo on Discord
