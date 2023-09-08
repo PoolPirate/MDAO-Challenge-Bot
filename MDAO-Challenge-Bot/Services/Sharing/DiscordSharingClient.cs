@@ -74,7 +74,7 @@ public class DiscordSharingClient : Singleton
     {
         if (!DiscordOptions.ShareLaborMarkets)
         {
-            Logger.LogWarning("Skipping sharing LaborMarketRequest: Sharing Disabled. Market={marketId}, Id={id}", laborMarket.Id, request.Id);
+            Logger.LogWarning("Skipping sharing LaborMarketRequest: Sharing Disabled. Market={market}, Id={id}", laborMarket.Address, request.Id);
             return;
         }
 

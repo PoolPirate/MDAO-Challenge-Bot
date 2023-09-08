@@ -61,7 +61,7 @@ public class TelegramSharingClient : Singleton
     {
         if (!TelegramOptions.EnableLaborMarketRequestNotification)
         {
-            Logger.LogWarning("Skipping sharing LaborMarketRequest: Sharing Disabled. Market={marketId}, Id={id}", laborMarket.Id, request.Id);
+            Logger.LogWarning("Skipping sharing LaborMarketRequest: Sharing Disabled. Market={market}, Id={id}", laborMarket.Address, request.Id);
             return;
         }
 

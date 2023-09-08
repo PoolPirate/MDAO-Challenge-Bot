@@ -17,7 +17,7 @@ public class SubscriptionSharingClient : Scoped
     public async Task ShareAsync(LaborMarket laborMarket, LaborMarketRequest request, TokenContract paymentToken)
     {
         var subscriptions = await DbContext.LaborMarketSubscriptions
-            .Where(x => x.LaborMarketId == laborMarket.Id)
+            .Where(x => x.LaborMarketAddress == laborMarket.Address)
             .ToArrayAsync();
 
         foreach(var subscription in subscriptions)

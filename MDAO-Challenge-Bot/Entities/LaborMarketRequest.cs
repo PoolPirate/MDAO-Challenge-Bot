@@ -7,7 +7,7 @@ public class LaborMarketRequest
     public long Id { get; init; }
 
     public required BigInteger RequestId { get; init; }
-    public required long LaborMarketId { get; init; }
+    public required string LaborMarketAddress { get; init; }
 
     public required string Requester { get; init; }
     public required string IPFSUri { get; init; }

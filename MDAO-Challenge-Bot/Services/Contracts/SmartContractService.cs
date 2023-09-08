@@ -10,11 +10,6 @@ public class SmartContractService : Singleton
     [Inject]
     private readonly Web3 Web3 = null!;
 
-    public Contract GetLaborMarket(string address)
-    {
-        return Web3.Eth.GetContract(LaborMarketContract.ABI, address);
-    }
-
     public async Task<BigInteger> GetPeakBlockHeightAsync()
     {
         return await Web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();

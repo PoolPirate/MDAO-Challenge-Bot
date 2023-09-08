@@ -48,4 +48,17 @@ public static class LaborMarketContract
         {
         }
     }
+
+    [Event("LaborMarketConfigured")]
+    public class ConfiguredEventDTO : EventDTO
+    {
+        [Parameter("address", "deployer", 1, indexed: false)]
+        public string Deployer { get; init; } = null!;
+
+        [Parameter("string", "uri", 2, indexed: false)]
+        public string Uri { get; init; } = null!;
+
+        [Parameter("address", "criteria", 3, indexed: false)]
+        public string Criteria { get; init; } = null!;
+    }
 }

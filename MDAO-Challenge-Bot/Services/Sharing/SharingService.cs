@@ -30,11 +30,11 @@ public class SharingService : Scoped
 
     public async Task ShareLaborMarketRequestAsync(LaborMarket laborMarket, LaborMarketRequest request, TokenContract paymentToken)
     {
-        Logger.LogInformation("Sharing LaborMarketRequest: Market={marketId}, Id={id}", laborMarket.Id, request.Id);
+        Logger.LogInformation("Sharing LaborMarketRequest: Market={market}, Id={id}", laborMarket.Address, request.Id);
 
         if (request.EnforcementExpiration < DateTimeOffset.UtcNow)
         {
-            Logger.LogWarning("Skipping sharing LaborMarketRequest: Expired. Market={marketId}, Id={id}", laborMarket.Id, request.Id);
+            Logger.LogWarning("Skipping sharing LaborMarketRequest: Expired. Market={market}, Id={id}", laborMarket.Address, request.Id);
             return;
         }
 

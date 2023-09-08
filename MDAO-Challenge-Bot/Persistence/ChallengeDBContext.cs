@@ -2,10 +2,13 @@
 using MDAO_Challenge_Bot.Entities.LaborMarketSubscriptions;
 using MDAO_Challenge_Bot.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Numerics;
 
 namespace MDAO_Challenge_Bot.Persistence;
 public class ChallengeDBContext : DbContext
 {
+    public DbSet<StatusValue> StatusValues { get; set; }
+
     public DbSet<LaborMarket> LaborMarkets { get; set; }
     public DbSet<LaborMarketRequest> LaborMarketRequests { get; set; }
     public DbSet<LaborMarketSubscription> LaborMarketSubscriptions { get; set; }
@@ -21,25 +24,31 @@ public class ChallengeDBContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<StatusValue>(b =>
+        {
+            b.Property(x => x.Name);
+            b.HasKey(x => x.Name);
+
+            b.Property(x => x.Value);
+
+            b.ToTable("StatusValues");
+        });
+
         modelBuilder.Entity<LaborMarket>(b =>
         {
-            b.Property(x => x.Id)
-            .ValueGeneratedOnAdd()
-            .UseIdentityAlwaysColumn();
-            b.HasKey(x => x.Id);
-
             b.Property(x => x.Address);
+            b.HasKey(x => x.Address);
+            
             b.Property(x => x.Name);
-
-            b.Property(x => x.LastUpdatedAtBlockHeight);
+            b.Property(x => x.Description);
 
             b.HasMany(x => x.Requests)
             .WithOne(x => x.LaborMarket)
-            .HasForeignKey(x => x.LaborMarketId);
+            .HasForeignKey(x => x.LaborMarketAddress);
 
             b.HasMany(x => x.Subscriptions)
             .WithOne(x => x.LaborMarket)
-            .HasForeignKey(x => x.LaborMarketId);
+            .HasForeignKey(x => x.LaborMarketAddress);
 
             b.ToTable("LaborMarket");
         });
@@ -53,7 +62,7 @@ public class ChallengeDBContext : DbContext
 
             b.Property(x => x.RequestId);
 
-            b.HasIndex(x => new { x.RequestId, x.LaborMarketId })
+            b.HasIndex(x => new { x.RequestId, x.LaborMarketAddress })
             .IsUnique();
 
             b.Property(x => x.Requester);
@@ -100,7 +109,7 @@ public class ChallengeDBContext : DbContext
             .UseIdentityAlwaysColumn();
             b.HasKey(x => x.Id);
 
-            b.Property(x => x.LaborMarketId);
+            b.Property(x => x.LaborMarketAddress);
 
             b.Property(x => x.Type);
 
