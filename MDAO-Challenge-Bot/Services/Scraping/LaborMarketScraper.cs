@@ -112,6 +112,8 @@ public class LaborMarketScraper : Singleton
                 return;
             }
 
+            var addedRequests = new List<LaborMarketRequest>();
+
             foreach (var log in logs)
             {
                 var metadata = await IPFSClient.GetJsonAsync<LaborMarketRequestMetadata>(log.Event.Uri);
@@ -163,10 +165,16 @@ public class LaborMarketScraper : Singleton
                 };
 
                 dbContext.LaborMarketRequests.Add(request);
-                BackgroundJob.Enqueue<SharingTaskRunner>(runner => runner.ShareLaborMarketRequest(request.Id));
+                addedRequests.Add(request);
             }
 
             await dbContext.SaveChangesAsync();
+
+            foreach(var request in addedRequests)
+            {
+                BackgroundJob.Enqueue<SharingTaskRunner>(runner => runner.ShareLaborMarketRequest(request.Id));
+            }
+
             transactionScope.Complete();
         }
         finally
