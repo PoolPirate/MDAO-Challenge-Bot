@@ -23,7 +23,7 @@ namespace MDAO_Challenge_Bot.Services.Scraping;
 public class LaborMarketScraper : Singleton
 {
     private const int UpdateInterval = 5000;
-    private const int FinalizationBlocks = 30;
+    private const int FinalizationBlocks = 3;
 
     [Inject]
     private readonly SmartContractService SmartContractService = null!;
